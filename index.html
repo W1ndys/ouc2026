@@ -1,0 +1,295 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>中国海洋大学26信息学部录分网站</title>
+    <script src="https://cdn.jsdelivr.net/npm/hydrogen-js-sdk/dist/Bmob-2.5.1.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; padding: 20px 10px; margin: 0;}
+        .container { 
+            background-color: white; 
+            padding: 25px; 
+            border-radius: 12px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+            max-width: 450px; 
+            width: 90%;       
+            box-sizing: border-box; 
+        }
+        h2 { text-align: center; color: #0056b3; font-size: 20px; line-height: 1.4; margin-bottom: 5px;}
+        .notice { background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; font-size: 12px; color: #856404; margin-bottom: 20px; border-radius: 4px;}
+        .step-box { display: none; }
+        .active-step { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: #444; font-weight: bold; font-size: 14px;}
+        .sub-label { font-size: 12px; color: #888; font-weight: normal; margin-left: 5px;}
+        input[type="number"], select { 
+            width: 100%; padding: 10px; border: 1px solid #ccc; 
+            border-radius: 6px; box-sizing: border-box; font-size: 14px;
+        }
+        button { width: 100%; padding: 12px; background-color: #0056b3; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; margin-top: 15px; font-weight: bold; transition: background-color 0.3s;}
+        button:hover { background-color: #004494; }
+        button:disabled { background-color: #999 !important; cursor: not-allowed; }
+        
+        .rank-item { background: #f8f9fa; padding: 12px; margin-bottom: 10px; border-left: 5px solid #0056b3; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;}
+        .rank-num { font-size: 18px; font-weight: bold; color: #e74c3c; width: 40px;}
+        .rank-detail { flex-grow: 1; }
+        
+        .reset-btn { background: none; border: none; color: #999; text-decoration: underline; font-size: 12px; width: auto; padding: 0; margin-top: 20px; cursor: pointer; display: block; margin-left: auto; margin-right: auto;}
+        .reset-btn:hover { color: #e74c3c; background: none;}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>中国海洋大学26信息学部<br>初试成绩录入与排名</h2>
+    
+    <div class="notice">
+        <strong>⚠️ 防刷榜核实声明：</strong><br>
+        为保证榜单纯洁性，系统已开启暗访机制。管理员将通过预留的QQ号添加好友核验【准考证】与【查分截图】。无法提供真实截图者，将直接剔除成绩并永久拉黑IP。
+    </div>
+
+    <div id="step2" class="step-box active-step">
+        
+        <div class="input-group">
+            <label>联系QQ <span class="sub-label">(仅用于防伪核实，榜单绝不公开)</span></label>
+            <input type="number" id="qqNum" placeholder="请输入真实可用QQ号">
+        </div>
+
+        <div class="input-group">
+            <label>报考专业与方向</label>
+            <select id="majorSelect">
+                <option value="" disabled selected>请选择你的专业与方向...</option>
+                <optgroup label="计算机科学与技术">
+                    <option value="081200 计算机科学与技术 (00不区分)">081200 计算机科学与技术 (00不区分方向)</option>
+                </optgroup>
+                <optgroup label="网络空间安全与保密">
+                    <option value="0812Z1 网络空间安全与保密 (00不区分)">0812Z1 网络空间安全与保密 (00不区分方向)</option>
+                </optgroup>
+                <optgroup label="计算机技术">
+                    <option value="085404 计算机技术 (01计算机技术)">085404 计算机技术 (01计算机技术)</option>
+                    <option value="085404 计算机技术 (02三亚)">085404 计算机技术 (02三亚)</option>
+                    <option value="085404 计算机技术 (03万里学院联培)">085404 计算机技术 (03万里学院联培)</option>
+                    <option value="085404 计算机技术 (04中法双硕士)">085404 计算机技术 (04中法双硕士)</option>
+                    <option value="085404 计算机技术 (05中新双硕士)">085404 计算机技术 (05中新双硕士)</option>
+                    <option value="085404 计算机技术 (00不区分)">085404 计算机技术 (00不区分方向)</option>
+                </optgroup>
+                <optgroup label="软件工程">
+                    <option value="085405 软件工程 (00不区分)">085405 软件工程 (00不区分方向)</option>
+                </optgroup>
+                <optgroup label="人工智能">
+                    <option value="085410 人工智能 (01人工智能)">085410 人工智能 (01人工智能)</option>
+                    <option value="085410 人工智能 (02三亚)">085410 人工智能 (02三亚)</option>
+                    <option value="085410 人工智能 (00不区分)">085410 人工智能 (00不区分方向)</option>
+                </optgroup>
+                <optgroup label="大数据技术与工程">
+                    <option value="085411 大数据技术与工程 (00不区分)">085411 大数据技术与工程 (00不区分方向)</option>
+                </optgroup>
+                <optgroup label="网络与信息安全">
+                    <option value="085412 网络与信息安全 (00不区分)">085412 网络与信息安全 (00不区分方向)</option>
+                </optgroup>
+            </select>
+        </div>
+
+        <div class="input-group"><label>政治</label><input type="number" id="sub1" placeholder="输入分数"></div>
+        <div class="input-group"><label>英语</label><input type="number" id="sub2" placeholder="输入分数"></div>
+        <div class="input-group"><label>数学</label><input type="number" id="sub3" placeholder="输入分数"></div>
+        <div class="input-group"><label>专业课(408)</label><input type="number" id="sub4" placeholder="输入分数"></div>
+        
+        <button id="submitBtn" onclick="submitCloudScore()">提交成绩</button>
+    </div>
+
+    <div id="step3" class="step-box">
+        <h3 style="color:#333; border-bottom: 2px solid #eee; padding-bottom: 8px; font-size: 16px; margin-bottom: 10px;">实时总分排行榜</h3>
+        
+        <div class="input-group" style="background:#e9f2fb; padding:10px; border-radius:6px;">
+            <label style="color:#0056b3; font-size:12px; margin-bottom: 4px;">当前榜单专业方向：</label>
+            <select id="rankFilter" onchange="fetchRanking()" style="padding: 6px; font-size: 13px;"></select>
+        </div>
+
+        <div id="rankingList" style="margin-top: 15px; font-size: 14px;">正在努力从云端拉取排名数据...</div>
+        
+        <button id="modifyBtn" onclick="modifyScore()" style="background-color: #e67e22; margin-top: 20px;">发现填错？返回修改成绩</button>
+
+        <button class="reset-btn" onclick="resetTest()">[清除本地缓存重新录入]</button>
+    </div>
+</div>
+
+<script>
+    Bmob.initialize("3214f8afece0391a", "ouc2026score1234");
+    document.getElementById('rankFilter').innerHTML = document.getElementById('majorSelect').innerHTML;
+
+    window.onload = function() {
+        let savedMajor = localStorage.getItem('ouc_my_major');
+        // 如果之前提交过，直接切到榜单
+        if(localStorage.getItem('ouc_has_submitted') === 'true' && savedMajor) {
+            document.getElementById('rankFilter').value = savedMajor;
+            updateModifyBtnUI();
+            showStep(3);
+            fetchRanking();
+        }
+    }
+
+    function showStep(stepNumber) {
+        document.querySelectorAll('.step-box').forEach(el => el.classList.remove('active-step'));
+        document.getElementById('step' + stepNumber).classList.add('active-step');
+    }
+
+    // 更新修改按钮的状态和文字
+    function updateModifyBtnUI() {
+        let count = parseInt(localStorage.getItem('ouc_modify_count')) || 0;
+        let remain = 3 - count;
+        let btn = document.getElementById('modifyBtn');
+        if(remain > 0) {
+            btn.innerText = `发现填错？返回修改成绩 (剩余 ${remain} 次)`;
+            btn.disabled = false;
+            btn.style.backgroundColor = '#e67e22'; // 橙色
+        } else {
+            btn.innerText = `修改次数已用完`;
+            btn.disabled = true;
+            btn.style.backgroundColor = '#95a5a6'; // 灰色不可点
+        }
+    }
+
+    // 点击修改成绩：把之前存的数据回填到输入框，跳转到第二步
+    function modifyScore() {
+        let count = parseInt(localStorage.getItem('ouc_modify_count')) || 0;
+        if(count >= 3) {
+            alert("你已经修改过3次，无法再次修改了！"); return;
+        }
+        
+        // 自动回填上次填写的数据
+        document.getElementById('qqNum').value = localStorage.getItem('ouc_my_qq') || '';
+        document.getElementById('majorSelect').value = localStorage.getItem('ouc_my_major') || '';
+        document.getElementById('sub1').value = localStorage.getItem('ouc_my_s1') || '';
+        document.getElementById('sub2').value = localStorage.getItem('ouc_my_s2') || '';
+        document.getElementById('sub3').value = localStorage.getItem('ouc_my_s3') || '';
+        document.getElementById('sub4').value = localStorage.getItem('ouc_my_s4') || '';
+        
+        document.getElementById('submitBtn').innerText = "确认修改并重新提交";
+        showStep(2);
+    }
+
+    function submitCloudScore() {
+        let qq = document.getElementById('qqNum').value;
+        let major = document.getElementById('majorSelect').value;
+        let s1 = Number(document.getElementById('sub1').value);
+        let s2 = Number(document.getElementById('sub2').value);
+        let s3 = Number(document.getElementById('sub3').value);
+        let s4 = Number(document.getElementById('sub4').value);
+
+        if(!qq || qq.length < 5) { alert("请填写正确的QQ号！"); return; }
+        if(!major) { alert("请选择报考专业与方向！"); return; }
+        if(!s1 || !s2 || !s3 || !s4) { alert("每一科成绩都必须填写哦！"); return; }
+        
+        let count = parseInt(localStorage.getItem('ouc_modify_count')) || 0;
+        let recordId = localStorage.getItem('ouc_record_id'); // 看看本地有没有记录ID
+        
+        if (recordId && count >= 3) {
+            alert("修改次数已达上限！"); return;
+        }
+
+        let total = s1 + s2 + s3 + s4;
+        let btn = document.getElementById('submitBtn');
+        btn.innerText = "数据提交中...";
+        btn.disabled = true;
+
+        const query = Bmob.Query('ScoreRecord');
+        // 【核心】：如果有 recordId，就是更新数据；如果没有，就是新建数据
+        if (recordId) {
+            query.set('id', recordId); 
+        }
+        query.set("qq", qq); 
+        query.set("major", major);
+        query.set("s1", s1);
+        query.set("s2", s2);
+        query.set("s3", s3);
+        query.set("s4", s4);
+        query.set("total", total);
+        
+        query.save().then(res => {
+            if(!recordId) {
+                // 第一次提交，记录下这条数据的专属ID
+                localStorage.setItem('ouc_record_id', res.objectId);
+                localStorage.setItem('ouc_modify_count', 0);
+                alert("成绩录入成功！");
+            } else {
+                // 修改成功，次数加 1
+                localStorage.setItem('ouc_modify_count', count + 1);
+                alert("成绩修改成功！");
+            }
+            
+            // 把数据缓存在本地，方便下次点修改时回填
+            localStorage.setItem('ouc_has_submitted', 'true');
+            localStorage.setItem('ouc_my_major', major);
+            localStorage.setItem('ouc_my_qq', qq);
+            localStorage.setItem('ouc_my_s1', s1);
+            localStorage.setItem('ouc_my_s2', s2);
+            localStorage.setItem('ouc_my_s3', s3);
+            localStorage.setItem('ouc_my_s4', s4);
+            
+            updateModifyBtnUI();
+            document.getElementById('rankFilter').value = major;
+            showStep(3);
+            fetchRanking();
+        }).catch(err => {
+            alert("上传失败，请检查网络");
+            btn.innerText = recordId ? "确认修改并重新提交" : "立下誓言，提交成绩";
+            btn.disabled = false;
+        });
+    }
+
+    function fetchRanking() {
+        let selectedMajor = document.getElementById('rankFilter').value;
+        let rankDiv = document.getElementById('rankingList');
+        rankDiv.innerHTML = "正在拉取 " + selectedMajor + " 的排名...";
+
+        const query = Bmob.Query('ScoreRecord');
+        query.equalTo("major", "==", selectedMajor);
+        query.order("-total"); 
+        query.limit(100); 
+        
+        query.find().then(records => {
+            let htmlStr = "";
+            if(records.length === 0) {
+                rankDiv.innerHTML = `<div style="text-align:center; color:#999; margin-top:20px;">该方向目前还没有人录入成绩。</div>`;
+                return;
+            }
+
+            records.forEach((item, index) => {
+                htmlStr += `
+                    <div class="rank-item">
+                        <div class="rank-num">#${index + 1}</div>
+                        <div class="rank-detail">
+                            <strong>总分：<span style="color:#e74c3c; font-size:16px;">${item.total}</span></strong><br>
+                            <span style="font-size:12px; color:#555;">政:${item.s1} | 英:${item.s2} | 数:${item.s3} | 408:${item.s4}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            rankDiv.innerHTML = htmlStr;
+        }).catch(err => {
+            rankDiv.innerHTML = "云端数据拉取失败，请检查网络。";
+        });
+    }
+
+    function resetTest() {
+        // 清除所有缓存，方便开发者测试
+        localStorage.removeItem('ouc_has_submitted');
+        localStorage.removeItem('ouc_my_major');
+        localStorage.removeItem('ouc_record_id');
+        localStorage.removeItem('ouc_modify_count');
+        localStorage.removeItem('ouc_my_qq');
+        localStorage.removeItem('ouc_my_s1');
+        localStorage.removeItem('ouc_my_s2');
+        localStorage.removeItem('ouc_my_s3');
+        localStorage.removeItem('ouc_my_s4');
+        location.reload();
+    }
+</script>
+
+</body>
+</html>
