@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-    <title>中国海洋大学26信息学部录分网站</title>
+    <title>中国海洋大学26信息学部初试录分与排名</title>
     <script src="https://cdn.jsdelivr.net/npm/hydrogen-js-sdk/dist/Bmob-2.5.1.min.js"></script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; padding: 20px 10px; margin: 0;}
@@ -38,8 +37,9 @@
         .rank-num { font-size: 18px; font-weight: bold; color: #e74c3c; width: 40px;}
         .rank-detail { flex-grow: 1; }
         
-        .reset-btn { background: none; border: none; color: #999; text-decoration: underline; font-size: 12px; width: auto; padding: 0; margin-top: 20px; cursor: pointer; display: block; margin-left: auto; margin-right: auto;}
-        .reset-btn:hover { color: #e74c3c; background: none;}
+        /* 登录页专属样式 */
+        .login-box { text-align: center; padding: 20px 0; }
+        .login-icon { font-size: 40px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -49,14 +49,24 @@
     
     <div class="notice">
         <strong>⚠️ 防刷榜核实声明：</strong><br>
-        为保证榜单纯洁性，系统已开启暗访机制。管理员将通过预留的QQ号添加好友核验【准考证】与【查分截图】。无法提供真实截图者，将直接剔除成绩并永久拉黑IP。
+        为保证榜单纯洁性，系统已开启暗访机制。管理员将通过预留的QQ号添加核验【准考证】与【成绩截图】。无法提供者，成绩将被直接剔除。
     </div>
 
-    <div id="step2" class="step-box active-step">
-        
-        <div class="input-group">
-            <label>联系QQ <span class="sub-label">(仅用于防伪核实，榜单绝不公开)</span></label>
-            <input type="number" id="qqNum" placeholder="请输入真实可用QQ号">
+    <div id="step1" class="step-box active-step">
+        <div class="login-box">
+            <div class="login-icon">🐧</div>
+            <h3 style="color:#333; margin-bottom: 20px;">身份通行证</h3>
+            <div class="input-group" style="text-align: left;">
+                <label>请输入你的真实 QQ 号</label>
+                <input type="number" id="loginQQ" placeholder="输入QQ号进入系统 / 找回成绩">
+            </div>
+            <button id="loginBtn" onclick="loginWithQQ()">进入系统</button>
+        </div>
+    </div>
+
+    <div id="step2" class="step-box">
+        <div style="background:#e8f4f8; padding:10px; border-radius:6px; margin-bottom:15px; font-size:13px; color:#0056b3; text-align:center;">
+            当前登录身份：QQ <strong id="displayQQ"></strong>
         </div>
 
         <div class="input-group">
@@ -99,7 +109,7 @@
         <div class="input-group"><label>数学</label><input type="number" id="sub3" placeholder="输入分数"></div>
         <div class="input-group"><label>专业课(408)</label><input type="number" id="sub4" placeholder="输入分数"></div>
         
-        <button id="submitBtn" onclick="submitCloudScore()">提交成绩</button>
+        <button id="submitBtn" onclick="submitCloudScore()">立下誓言，提交成绩</button>
     </div>
 
     <div id="step3" class="step-box">
@@ -112,97 +122,106 @@
 
         <div id="rankingList" style="margin-top: 15px; font-size: 14px;">正在努力从云端拉取排名数据...</div>
         
-        <button id="modifyBtn" onclick="modifyScore()" style="background-color: #e67e22; margin-top: 20px;">发现填错？返回修改成绩</button>
-
-        <button class="reset-btn" onclick="resetTest()">[清除本地缓存重新录入]</button>
+        <button id="modifyBtn" onclick="goToModify()" style="background-color: #e67e22; margin-top: 20px;">发现填错？返回修改成绩</button>
+        <button onclick="logout()" style="background-color: #7f8c8d; margin-top: 10px;">安全退出当前 QQ</button>
     </div>
 </div>
 
 <script>
+    // Bmob 密钥初始化
     Bmob.initialize("3214f8afece0391a", "ouc2026score1234");
     document.getElementById('rankFilter').innerHTML = document.getElementById('majorSelect').innerHTML;
 
-    window.onload = function() {
-        let savedMajor = localStorage.getItem('ouc_my_major');
-        // 如果之前提交过，直接切到榜单
-        if(localStorage.getItem('ouc_has_submitted') === 'true' && savedMajor) {
-            document.getElementById('rankFilter').value = savedMajor;
-            updateModifyBtnUI();
-            showStep(3);
-            fetchRanking();
-        }
-    }
+    // 全局变量管理用户状态（纯内存，刷新即丢，绝对不缓存到硬盘）
+    let globalUserQQ = ""; 
+    let globalRecordId = ""; 
 
     function showStep(stepNumber) {
         document.querySelectorAll('.step-box').forEach(el => el.classList.remove('active-step'));
         document.getElementById('step' + stepNumber).classList.add('active-step');
     }
 
-    // 更新修改按钮的状态和文字
-    function updateModifyBtnUI() {
-        let count = parseInt(localStorage.getItem('ouc_modify_count')) || 0;
-        let remain = 3 - count;
-        let btn = document.getElementById('modifyBtn');
-        if(remain > 0) {
-            btn.innerText = `发现填错？返回修改成绩 (剩余 ${remain} 次)`;
+    // 登录核心逻辑：只认云端数据，不认本地！
+    function loginWithQQ() {
+        let qq = document.getElementById('loginQQ').value;
+        if(!qq || qq.length < 5) { alert("请输入正确的QQ号！"); return; }
+
+        let btn = document.getElementById('loginBtn');
+        btn.innerText = "正在核对云端档案...";
+        btn.disabled = true;
+
+        const query = Bmob.Query("ScoreRecord");
+        query.equalTo("qq", "==", qq);
+        query.find().then(res => {
+            globalUserQQ = qq;
+            document.getElementById('displayQQ').innerText = qq;
+
+            // 只要云端查到数据，就是老用户
+            if (res.length > 0) {
+                let myData = res[0];
+                globalRecordId = myData.objectId; 
+                
+                document.getElementById('majorSelect').value = myData.major;
+                document.getElementById('sub1').value = myData.s1;
+                document.getElementById('sub2').value = myData.s2;
+                document.getElementById('sub3').value = myData.s3;
+                document.getElementById('sub4').value = myData.s4;
+
+                document.getElementById('rankFilter').value = myData.major;
+                showStep(3);
+                fetchRanking();
+            } 
+            // 只要云端没查到（或者是被管理员删除了），统一按新用户处理！
+            else {
+                globalRecordId = ""; 
+                // 清空表格，防止上一个人的痕迹串场
+                document.getElementById('majorSelect').value = "";
+                document.getElementById('sub1').value = "";
+                document.getElementById('sub2').value = "";
+                document.getElementById('sub3').value = "";
+                document.getElementById('sub4').value = "";
+                
+                showStep(2);
+            }
+            
+            btn.innerText = "进入系统";
             btn.disabled = false;
-            btn.style.backgroundColor = '#e67e22'; // 橙色
-        } else {
-            btn.innerText = `修改次数已用完`;
-            btn.disabled = true;
-            btn.style.backgroundColor = '#95a5a6'; // 灰色不可点
-        }
+        }).catch(err => {
+            alert("网络连接失败，请检查网络！");
+            btn.innerText = "进入系统";
+            btn.disabled = false;
+        });
     }
 
-    // 点击修改成绩：把之前存的数据回填到输入框，跳转到第二步
-    function modifyScore() {
-        let count = parseInt(localStorage.getItem('ouc_modify_count')) || 0;
-        if(count >= 3) {
-            alert("你已经修改过3次，无法再次修改了！"); return;
-        }
-        
-        // 自动回填上次填写的数据
-        document.getElementById('qqNum').value = localStorage.getItem('ouc_my_qq') || '';
-        document.getElementById('majorSelect').value = localStorage.getItem('ouc_my_major') || '';
-        document.getElementById('sub1').value = localStorage.getItem('ouc_my_s1') || '';
-        document.getElementById('sub2').value = localStorage.getItem('ouc_my_s2') || '';
-        document.getElementById('sub3').value = localStorage.getItem('ouc_my_s3') || '';
-        document.getElementById('sub4').value = localStorage.getItem('ouc_my_s4') || '';
-        
+    function goToModify() {
         document.getElementById('submitBtn').innerText = "确认修改并重新提交";
+        document.getElementById('submitBtn').disabled = false;
         showStep(2);
     }
 
     function submitCloudScore() {
-        let qq = document.getElementById('qqNum').value;
         let major = document.getElementById('majorSelect').value;
-        let s1 = Number(document.getElementById('sub1').value);
-        let s2 = Number(document.getElementById('sub2').value);
-        let s3 = Number(document.getElementById('sub3').value);
-        let s4 = Number(document.getElementById('sub4').value);
+        let v1 = document.getElementById('sub1').value;
+        let v2 = document.getElementById('sub2').value;
+        let v3 = document.getElementById('sub3').value;
+        let v4 = document.getElementById('sub4').value;
 
-        if(!qq || qq.length < 5) { alert("请填写正确的QQ号！"); return; }
         if(!major) { alert("请选择报考专业与方向！"); return; }
-        if(!s1 || !s2 || !s3 || !s4) { alert("每一科成绩都必须填写哦！"); return; }
+        if(v1 === '' || v2 === '' || v3 === '' || v4 === '') { alert("每一科成绩都必须填写哦！"); return; }
         
-        let count = parseInt(localStorage.getItem('ouc_modify_count')) || 0;
-        let recordId = localStorage.getItem('ouc_record_id'); // 看看本地有没有记录ID
-        
-        if (recordId && count >= 3) {
-            alert("修改次数已达上限！"); return;
-        }
-
+        let s1 = Number(v1); let s2 = Number(v2); let s3 = Number(v3); let s4 = Number(v4);
         let total = s1 + s2 + s3 + s4;
+
         let btn = document.getElementById('submitBtn');
-        btn.innerText = "数据提交中...";
+        btn.innerText = "数据跨海传输中...";
         btn.disabled = true;
 
         const query = Bmob.Query('ScoreRecord');
-        // 【核心】：如果有 recordId，就是更新数据；如果没有，就是新建数据
-        if (recordId) {
-            query.set('id', recordId); 
+        // 如果有云端 ID，就执行更新；如果没有，就执行新建
+        if (globalRecordId) {
+            query.set('id', globalRecordId); 
         }
-        query.set("qq", qq); 
+        query.set("qq", globalUserQQ); 
         query.set("major", major);
         query.set("s1", s1);
         query.set("s2", s2);
@@ -211,33 +230,19 @@
         query.set("total", total);
         
         query.save().then(res => {
-            if(!recordId) {
-                // 第一次提交，记录下这条数据的专属ID
-                localStorage.setItem('ouc_record_id', res.objectId);
-                localStorage.setItem('ouc_modify_count', 0);
-                alert("成绩录入成功！");
+            if(!globalRecordId) {
+                globalRecordId = res.objectId; 
+                alert("初试成绩录入成功！");
             } else {
-                // 修改成功，次数加 1
-                localStorage.setItem('ouc_modify_count', count + 1);
-                alert("成绩修改成功！");
+                alert("成绩已成功更新！");
             }
             
-            // 把数据缓存在本地，方便下次点修改时回填
-            localStorage.setItem('ouc_has_submitted', 'true');
-            localStorage.setItem('ouc_my_major', major);
-            localStorage.setItem('ouc_my_qq', qq);
-            localStorage.setItem('ouc_my_s1', s1);
-            localStorage.setItem('ouc_my_s2', s2);
-            localStorage.setItem('ouc_my_s3', s3);
-            localStorage.setItem('ouc_my_s4', s4);
-            
-            updateModifyBtnUI();
             document.getElementById('rankFilter').value = major;
             showStep(3);
             fetchRanking();
         }).catch(err => {
-            alert("上传失败，请检查网络");
-            btn.innerText = recordId ? "确认修改并重新提交" : "立下誓言，提交成绩";
+            alert("提交失败，请检查网络状态");
+            btn.innerText = globalRecordId ? "确认修改并重新提交" : "立下誓言，提交成绩";
             btn.disabled = false;
         });
     }
@@ -255,16 +260,21 @@
         query.find().then(records => {
             let htmlStr = "";
             if(records.length === 0) {
-                rankDiv.innerHTML = `<div style="text-align:center; color:#999; margin-top:20px;">该方向目前还没有人录入成绩。</div>`;
+                rankDiv.innerHTML = `<div style="text-align:center; color:#999; margin-top:20px;">该方向目前还没有人录入成绩，快来抢占沙发！</div>`;
                 return;
             }
 
             records.forEach((item, index) => {
+                // 判断是不是当前登录的 QQ 号，高亮显示自己的成绩
+                let isMe = (item.qq === globalUserQQ);
+                let bgStyle = isMe ? "background: #fff3cd; border-left: 5px solid #f39c12;" : "";
+                let meTag = isMe ? `<span style="background:#e74c3c; color:white; padding:2px 6px; border-radius:4px; font-size:10px; margin-left:5px;">我</span>` : "";
+
                 htmlStr += `
-                    <div class="rank-item">
+                    <div class="rank-item" style="${bgStyle}">
                         <div class="rank-num">#${index + 1}</div>
                         <div class="rank-detail">
-                            <strong>总分：<span style="color:#e74c3c; font-size:16px;">${item.total}</span></strong><br>
+                            <strong>总分：<span style="color:#e74c3c; font-size:16px;">${item.total}</span></strong> ${meTag}<br>
                             <span style="font-size:12px; color:#555;">政:${item.s1} | 英:${item.s2} | 数:${item.s3} | 408:${item.s4}</span>
                         </div>
                     </div>
@@ -276,18 +286,12 @@
         });
     }
 
-    function resetTest() {
-        // 清除所有缓存，方便开发者测试
-        localStorage.removeItem('ouc_has_submitted');
-        localStorage.removeItem('ouc_my_major');
-        localStorage.removeItem('ouc_record_id');
-        localStorage.removeItem('ouc_modify_count');
-        localStorage.removeItem('ouc_my_qq');
-        localStorage.removeItem('ouc_my_s1');
-        localStorage.removeItem('ouc_my_s2');
-        localStorage.removeItem('ouc_my_s3');
-        localStorage.removeItem('ouc_my_s4');
-        location.reload();
+    // 退出清空内存状态，回归初始
+    function logout() {
+        globalUserQQ = "";
+        globalRecordId = "";
+        document.getElementById('loginQQ').value = "";
+        showStep(1);
     }
 </script>
 
