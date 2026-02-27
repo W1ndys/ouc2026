@@ -473,7 +473,7 @@
     <script>
       // 后端API地址
       const API_BASE_URL = "/api/score";
-
+      
       // 通用API请求函数
       async function apiRequest(endpoint, method = "GET", data = null) {
         const url = `${API_BASE_URL}${endpoint}`;
@@ -509,6 +509,16 @@
 
         if (scoreImageInput.files.length > 0) {
           const file = scoreImageInput.files[0];
+          
+          // 检查文件大小，限制不超过 1MB
+          const maxSize = 1 * 1024 * 1024; // 1MB
+          if (file.size > maxSize) {
+            uploadStatus.style.display = "block";
+            uploadStatus.style.color = "#e74c3c";
+            uploadStatus.textContent = "图片大小不能超过 1MB，请重新选择";
+            return;
+          }
+          
           const formData = new FormData();
           formData.append("file", file);
 
@@ -553,7 +563,7 @@
       `;
       document.getElementById("rankFilter").innerHTML =
         aggOptions + baseOptions;
-      document.getElementById("chartMajorSelect").innerHTML =
+            document.getElementById("chartMajorSelect").innerHTML =
         aggOptions + baseOptions;
 
       // 默认选中 22408 大盘
@@ -895,7 +905,7 @@
           // 由于后端API不支持聚合查询，我们需要获取所有数据后在前端进行过滤
           // 这里使用专业课方向作为查询参数，后续在前端进行聚合
           const major = selectedMajor.includes("ALL_")
-            ? "081200 计算机科学与技术 (00不区分)"
+            ? ""
             : selectedMajor;
           const res = await apiRequest(
             `/ranking?major=${encodeURIComponent(major)}`,
