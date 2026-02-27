@@ -1,147 +1,43 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>中国海洋大学26信息学部初试录分与排名</title>
+    <title>海大26信息/卓越初试录分与排名</title>
     <script src="https://cdn.jsdelivr.net/npm/hydrogen-js-sdk/dist/Bmob-2.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <style>
-      body {
-        font-family: "Segoe UI", sans-serif;
-        background-color: #f4f7f6;
-        display: flex;
-        justify-content: center;
-        padding: 20px 10px;
-        margin: 0;
-      }
-      .container {
-        background-color: white;
-        padding: 25px;
-        border-radius: 12px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        max-width: 1000px;
-        width: 95%;
-        box-sizing: border-box;
-      }
-      h2 {
-        text-align: center;
-        color: #0056b3;
-        font-size: 20px;
-        line-height: 1.4;
-        margin-bottom: 5px;
-      }
-      .notice {
-        background-color: #fff3cd;
-        border-left: 4px solid #ffc107;
-        padding: 10px;
-        font-size: 12px;
-        color: #856404;
-        margin-bottom: 20px;
-        border-radius: 4px;
-      }
-      .step-box {
-        display: none;
-      }
-      .active-step {
-        display: block;
-        animation: fadeIn 0.5s;
-      }
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(-10px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      .input-group {
-        margin-bottom: 15px;
-      }
-      label {
-        display: block;
-        margin-bottom: 5px;
-        color: #444;
-        font-weight: bold;
-        font-size: 14px;
-      }
-      .sub-label {
-        font-size: 12px;
-        color: #888;
-        font-weight: normal;
-        margin-left: 5px;
-      }
-      input[type="number"],
-      select {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-        box-sizing: border-box;
-        font-size: 14px;
-      }
-      button {
-        width: 100%;
-        padding: 12px;
-        background-color: #0056b3;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        font-size: 16px;
-        cursor: pointer;
-        margin-top: 15px;
-        font-weight: bold;
-        transition: background-color 0.3s;
-      }
-      button:hover {
-        background-color: #004494;
-      }
-      button:disabled {
-        background-color: #999 !important;
-        cursor: not-allowed;
-      }
-
-      .rank-item {
-        background: #f8f9fa;
-        padding: 12px;
-        margin-bottom: 10px;
-        border-left: 5px solid #0056b3;
-        border-radius: 6px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      .rank-num {
-        font-size: 18px;
-        font-weight: bold;
-        color: #e74c3c;
-        width: 40px;
-      }
-      .rank-detail {
-        flex-grow: 1;
-      }
-
-      /* 登录页专属样式 */
-      .login-box {
-        text-align: center;
-        padding: 20px 0;
-      }
-      .login-icon {
-        font-size: 40px;
-        margin-bottom: 10px;
-      }
+      body { font-family: "Segoe UI", sans-serif; background-color: #f4f7f6; display: flex; justify-content: center; padding: 20px 10px; margin: 0; }
+      .container { background-color: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); max-width: 1000px; width: 95%; box-sizing: border-box; }
+      h2 { text-align: center; color: #0056b3; font-size: 20px; line-height: 1.4; margin-bottom: 5px; }
+      .notice { background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; font-size: 12px; color: #856404; margin-bottom: 20px; border-radius: 4px; }
+      .step-box { display: none; }
+      .active-step { display: block; animation: fadeIn 0.5s; }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+      .input-group { margin-bottom: 15px; }
+      label { display: block; margin-bottom: 5px; color: #444; font-weight: bold; font-size: 14px; }
+      .sub-label { font-size: 12px; color: #888; font-weight: normal; margin-left: 5px; }
+      input[type="number"], input[type="text"], input[type="file"], select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+      button { width: 100%; padding: 12px; background-color: #0056b3; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; margin-top: 15px; font-weight: bold; transition: background-color 0.3s; }
+      button:hover { background-color: #004494; }
+      button:disabled { background-color: #999 !important; cursor: not-allowed; }
+      .rank-item { background: #f8f9fa; padding: 12px; margin-bottom: 10px; border-left: 5px solid #0056b3; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
+      .rank-num { font-size: 18px; font-weight: bold; color: #e74c3c; width: 40px; }
+      .rank-detail { flex-grow: 1; }
+      .login-box { text-align: center; padding: 20px 0; }
+      .login-icon { font-size: 40px; margin-bottom: 10px; }
+      .group-divider { background-color: #e9ecef; font-weight: bold; color: #0056b3; text-align: center; }
+      /* 统计看板样式 */
+      .stats-banner { background: #d4edda; color: #155724; padding: 12px; border-radius: 6px; margin-bottom: 15px; display: flex; flex-wrap: wrap; justify-content: space-around; font-size: 13px; font-weight: bold; border: 1px solid #c3e6cb; }
     </style>
   </head>
   <body>
     <div class="container">
-      <h2>中国海洋大学26信息学部<br />初试成绩录入与排名</h2>
+      <h2>中国海洋大学26级初试成绩<br />信息学部 & 卓越工程师学院</h2>
 
       <div class="notice">
-        <strong>⚠️ 防刷榜核实声明：</strong><br />
-        为保证榜单纯洁性，系统已开启暗访机制。管理员将通过预留的QQ号添加核验【准考证】与【成绩截图】。无法提供者，成绩将被直接剔除。
+        <strong>⚠️ 严格审核声明：</strong><br />
+        系统已开启双盲审核。管理员将人工核对【准考证】与【查分截图】。<strong>仅审核通过的同学可解锁大盘统计与排名。</strong>
       </div>
 
       <div id="step1" class="step-box active-step">
@@ -150,215 +46,87 @@
           <h3 style="color: #333; margin-bottom: 20px">身份通行证</h3>
           <div class="input-group" style="text-align: left">
             <label>请输入你的真实 QQ 号</label>
-            <input
-              type="number"
-              id="loginQQ"
-              placeholder="输入QQ号进入系统 / 找回成绩"
-            />
+            <input type="text" id="loginQQ" placeholder="输入QQ号进入系统" />
           </div>
           <button id="loginBtn" onclick="loginWithQQ()">进入系统</button>
         </div>
       </div>
 
       <div id="step2" class="step-box">
-        <div
-          style="
-            background: #e8f4f8;
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            font-size: 13px;
-            color: #0056b3;
-            text-align: center;
-          "
-        >
-          当前登录身份：QQ <strong id="displayQQ"></strong>
+        <div style="background: #e8f4f8; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 13px; color: #0056b3; text-align: center;">
+            当前登录身份：QQ <strong id="displayQQ"></strong>
         </div>
-
         <div class="input-group">
-          <label>报考专业与方向</label>
+            <label>准考证号 <span class="sub-label">(仅用于官方核对，绝不公开)</span></label>
+            <input type="text" id="ticketNum" placeholder="请输入15位准考证号">
+        </div>
+        <div class="input-group">
+          <label>报考学院与方向</label>
           <select id="majorSelect">
-            <option value="" disabled selected>请选择你的专业与方向...</option>
-            <optgroup label="计算机科学与技术">
-              <option value="081200 计算机科学与技术 (00不区分)">
-                081200 计算机科学与技术 (00不区分方向)
-              </option>
-            </optgroup>
-            <optgroup label="网络空间安全与保密">
-              <option value="0812Z1 网络空间安全与保密 (00不区分)">
-                0812Z1 网络空间安全与保密 (00不区分方向)
-              </option>
-            </optgroup>
-            <optgroup label="计算机技术">
-              <option value="085404 计算机技术 (01计算机技术)">
-                085404 计算机技术 (01计算机技术)
-              </option>
-              <option value="085404 计算机技术 (02三亚)">
-                085404 计算机技术 (02三亚)
-              </option>
-              <option value="085404 计算机技术 (03万里学院联培)">
-                085404 计算机技术 (03万里学院联培)
-              </option>
-              <option value="085404 计算机技术 (04中法双硕士)">
-                085404 计算机技术 (04中法双硕士)
-              </option>
-              <option value="085404 计算机技术 (05中新双硕士)">
-                085404 计算机技术 (05中新双硕士)
-              </option>
-              <option value="085404 计算机技术 (00不区分)">
-                085404 计算机技术 (00不区分方向)
-              </option>
-            </optgroup>
-            <optgroup label="软件工程">
-              <option value="085405 软件工程 (00不区分)">
-                085405 软件工程 (00不区分方向)
-              </option>
-            </optgroup>
-            <optgroup label="人工智能">
-              <option value="085410 人工智能 (01人工智能)">
-                085410 人工智能 (01人工智能)
-              </option>
-              <option value="085410 人工智能 (02三亚)">
-                085410 人工智能 (02三亚)
-              </option>
-              <option value="085410 人工智能 (00不区分)">
-                085410 人工智能 (00不区分方向)
-              </option>
-            </optgroup>
-            <optgroup label="大数据技术与工程">
-              <option value="085411 大数据技术与工程 (00不区分)">
-                085411 大数据技术与工程 (00不区分方向)
-              </option>
-            </optgroup>
-            <optgroup label="网络与信息安全">
-              <option value="085412 网络与信息安全 (00不区分)">
-                085412 网络与信息安全 (00不区分方向)
-              </option>
-            </optgroup>
+            <option value="" disabled selected>请选择你的报考方向...</option>
+            <option disabled class="group-divider">—— 信息学部 (11408 / 22408) ——</option>
+            <option value="[信息] 081200 计算机科学与技术 (00不区分)">[信息] 081200 计算机科学与技术 (学硕)</option>
+            <option value="[信息] 0812Z1 网络空间安全与保密 (00不区分)">[信息] 0812Z1 网络空间安全与保密 (学硕)</option>
+            <option value="[信息] 085404 计算机技术 (01计算机技术)">[信息] 085404 计算机技术 (01方向)</option>
+            <option value="[信息] 085404 计算机技术 (02三亚)">[信息] 085404 计算机技术 (02三亚)</option>
+            <option value="[信息] 085404 计算机技术 (03万里学院联培)">[信息] 085404 计算机技术 (03联培)</option>
+            <option value="[信息] 085404 计算机技术 (04中法双硕士)">[信息] 085404 计算机技术 (04中法双硕士)</option>
+            <option value="[信息] 085404 计算机技术 (05中新双硕士)">[信息] 085404 计算机技术 (05中新双硕士)</option>
+            <option value="[信息] 085404 计算机技术 (00不区分)">[信息] 085404 计算机技术 (00不区分方向)</option>
+            <option value="[信息] 085405 软件工程 (00不区分)">[信息] 085405 软件工程</option>
+            <option value="[信息] 085410 人工智能 (01人工智能)">[信息] 085410 人工智能 (01方向)</option>
+            <option value="[信息] 085410 人工智能 (02三亚)">[信息] 085410 人工智能 (02三亚)</option>
+            <option value="[信息] 085410 人工智能 (00不区分)">[信息] 085410 人工智能 (00不区分方向)</option>
+            
+            <option disabled class="group-divider">—— 卓越工程师学院 (22408) ——</option>
+            <option value="[卓越] 085404 计算机技术 (00不区分)">[卓越] 085404 计算机技术</option>
+            <option value="[卓越] 085405 软件工程 (00不区分)">[卓越] 085405 软件工程</option>
+            <option value="[卓越] 085410 人工智能 (00不区分)">[卓越] 085410 人工智能</option>
+            <option value="[卓越] 085411 大数据技术与工程 (00不区分)">[卓越] 085411 大数据技术与工程</option>
+            <option value="[卓越] 085412 网络与信息安全 (00不区分)">[卓越] 085412 网络与信息安全</option>
           </select>
         </div>
-
-        <div class="input-group">
-          <label>政治</label
-          ><input type="number" id="sub1" placeholder="输入分数" />
+        <div class="input-group"><label>政治</label><input type="number" id="sub1" placeholder="输入分数"></div>
+        <div class="input-group"><label>英语</label><input type="number" id="sub2" placeholder="输入分数"></div>
+        <div class="input-group"><label>数学</label><input type="number" id="sub3" placeholder="输入分数"></div>
+        <div class="input-group"><label>专业课(408)</label><input type="number" id="sub4" placeholder="输入分数"></div>
+        
+        <div class="input-group" style="background:#fff9e6; padding:10px; border-radius:6px; border: 1px dashed #f39c12;">
+            <label style="color:#d35400;">研招网查分截图 <span id="imgRequireTip" class="sub-label"></span></label>
+            <input type="file" id="scoreImage" accept="image/png, image/jpeg, image/jpg">
+            <div style="font-size:11px; color:#888; margin-top:5px;">包含准考证号和分数的完整截图，审核唯一凭证。</div>
         </div>
-        <div class="input-group">
-          <label>英语</label
-          ><input type="number" id="sub2" placeholder="输入分数" />
-        </div>
-        <div class="input-group">
-          <label>数学</label
-          ><input type="number" id="sub3" placeholder="输入分数" />
-        </div>
-        <div class="input-group">
-          <label>专业课(408)</label
-          ><input type="number" id="sub4" placeholder="输入分数" />
-        </div>
-
-        <button id="submitBtn" onclick="submitCloudScore()">提交成绩</button>
+        <button id="submitBtn" onclick="submitCloudScore()">提交数据，等待管理员审核</button>
       </div>
 
       <div id="step3" class="step-box">
-        <h3
-          style="
-            color: #333;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 8px;
-            font-size: 16px;
-            margin-bottom: 10px;
-          "
-        >
-          实时总分排行榜
-        </h3>
-
-        <div
-          class="input-group"
-          style="background: #e9f2fb; padding: 10px; border-radius: 6px"
-        >
-          <label style="color: #0056b3; font-size: 12px; margin-bottom: 4px"
-            >当前榜单专业方向：</label
-          >
-          <select
-            id="rankFilter"
-            onchange="fetchRanking()"
-            style="padding: 6px; font-size: 13px"
-          ></select>
+        <h3 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 8px; font-size: 16px; margin-bottom: 10px;">📊 实时统计排行榜</h3>
+        
+        <div class="input-group" style="background: #e9f2fb; padding: 10px; border-radius: 6px">
+          <label style="color: #0056b3; font-size: 12px; margin-bottom: 4px">选择统计范围：</label>
+          <select id="rankFilter" onchange="fetchRanking()" style="padding: 6px; font-size: 13px;"></select>
         </div>
 
-        <div id="rankingList" style="margin-top: 15px; font-size: 14px">
-          正在努力从云端拉取排名数据...
-        </div>
+        <div id="statsBanner"></div>
 
-        <button
-          id="modifyBtn"
-          onclick="goToModify()"
-          style="background-color: #e67e22; margin-top: 20px"
-        >
-          发现填错？返回修改成绩
-        </button>
-        <button
-          onclick="showCharts()"
-          style="background-color: #27ae60; margin-top: 10px"
-        >
-          查看成绩趋势图表
-        </button>
-        <button
-          onclick="logout()"
-          style="background-color: #7f8c8d; margin-top: 10px"
-        >
-          安全退出当前 QQ
-        </button>
+        <div id="rankingList" style="margin-top: 15px; font-size: 14px">正在努力拉取审核数据...</div>
+        
+        <button id="modifyBtn" onclick="goToModify()" style="background-color: #e67e22; margin-top: 20px">发现填错？返回修改成绩</button>
+        <button onclick="showCharts()" style="background-color: #27ae60; margin-top: 10px">查看本榜单趋势图表</button>
+        <button onclick="logout()" style="background-color: #7f8c8d; margin-top: 10px">安全退出当前 QQ</button>
       </div>
 
       <div id="step4" class="step-box">
-        <h3
-          style="
-            color: #333;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 8px;
-            font-size: 16px;
-            margin-bottom: 10px;
-          "
-        >
-          成绩趋势图表
-        </h3>
+        <h3 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 8px; font-size: 16px; margin-bottom: 10px;">成绩分布图表</h3>
 
-        <div
-          class="input-group"
-          style="
-            background: #e9f2fb;
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-          "
-        >
-          <label style="color: #0056b3; font-size: 12px; margin-bottom: 4px"
-            >选择专业方向：</label
-          >
-          <select
-            id="chartMajorSelect"
-            onchange="updateChart()"
-            style="padding: 6px; font-size: 13px"
-          ></select>
+        <div class="input-group" style="background: #e9f2fb; padding: 10px; border-radius: 6px; margin-bottom: 15px;">
+          <label style="color: #0056b3; font-size: 12px; margin-bottom: 4px">选择统计范围：</label>
+          <select id="chartMajorSelect" onchange="updateChart()" style="padding: 6px; font-size: 13px;"></select>
         </div>
 
-        <div
-          class="input-group"
-          style="
-            background: #e9f2fb;
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-          "
-        >
-          <label style="color: #0056b3; font-size: 12px; margin-bottom: 4px"
-            >选择科目：</label
-          >
-          <select
-            id="chartSubjectSelect"
-            onchange="updateChart()"
-            style="padding: 6px; font-size: 13px"
-          >
+        <div class="input-group" style="background: #e9f2fb; padding: 10px; border-radius: 6px; margin-bottom: 15px;">
+          <label style="color: #0056b3; font-size: 12px; margin-bottom: 4px">查看具体科目：</label>
+          <select id="chartSubjectSelect" onchange="updateChart()" style="padding: 6px; font-size: 13px">
             <option value="total">总分</option>
             <option value="s1">政治</option>
             <option value="s2">英语</option>
@@ -367,52 +135,62 @@
           </select>
         </div>
 
-        <div
-          id="chartContainer"
-          style="width: 100%; height: 400px; margin-top: 20px; min-width: 300px"
-        ></div>
+        <div id="chartContainer" style="width: 100%; height: 400px; margin-top: 20px; min-width: 300px"></div>
+        <button onclick="showStep(3)" style="background-color: #7f8c8d; margin-top: 20px">返回排名页面</button>
+      </div>
 
-        <button
-          onclick="showStep(3)"
-          style="background-color: #7f8c8d; margin-top: 20px"
-        >
-          返回排名页面
-        </button>
+      <div id="step5" class="step-box">
+          <div style="text-align: center; padding: 20px 10px;">
+              <div style="font-size: 60px; margin-bottom: 10px;">⏳</div>
+              <h3 style="color: #e67e22; margin-bottom: 15px;">档案正在火速审核中...</h3>
+              <div style="font-size: 13px; color: #555; line-height: 1.6; background: #fdf2e9; padding: 15px; border-radius: 8px; text-align: left;">
+                  为保证每位同学看到的分数绝对真实：<br><br>
+                  1. 管理员正在人工比对你的<b>查分截图</b>与<b>填报分数</b>。<br>
+                  2. <b>审核通过后，你将立即解锁完整的大盘数据、排行与图表！</b><br>
+                  3. 请耐心等待，稍后可重新输入 QQ 登录查看进度。
+              </div>
+              <button onclick="goToModify()" style="background-color: #3498db; margin-top: 25px;">我想修改提交的数据</button>
+              <button onclick="logout()" style="background-color: #7f8c8d; margin-top: 10px;">退出，稍后再来看</button>
+          </div>
       </div>
     </div>
 
     <script>
       // Bmob 密钥初始化
       Bmob.initialize("3214f8afece0391a", "ouc2026score1234");
-      document.getElementById("rankFilter").innerHTML =
-        document.getElementById("majorSelect").innerHTML;
+      
+      // 动态注入【大盘聚合】选项
+      const baseOptions = document.getElementById("majorSelect").innerHTML;
+      const aggOptions = `
+        <option disabled class="group-divider">====== 📊 大盘综合统计 ======</option>
+        <option value="ALL_11408">【大盘】全部 11408 考生 (学硕)</option>
+        <option value="ALL_22408">【大盘】全部 22408 考生 (专硕)</option>
+        <option value="ALL_085404">【聚合】所有 计算机技术 (085404)</option>
+        <option value="ALL_085405">【聚合】所有 软件工程 (085405)</option>
+        <option value="ALL_085410">【聚合】所有 人工智能 (085410)</option>
+      `;
+      document.getElementById("rankFilter").innerHTML = aggOptions + baseOptions;
+      document.getElementById("chartMajorSelect").innerHTML = aggOptions + baseOptions;
+      
+      // 默认选中 22408 大盘
+      document.getElementById("rankFilter").value = "ALL_22408";
 
-      // 全局变量管理用户状态（纯内存，刷新即丢，绝对不缓存到硬盘）
+      // 全局变量管理
       let globalUserQQ = "";
       let globalRecordId = "";
+      let globalIsApproved = false;
 
-      // SQLite 数据库操作
+      // IndexedDB 本地兜底缓存
       let db;
-      const DB_NAME = "OUC2026ScoreDB";
+      const DB_NAME = "OUC2026ScoreDB_v3";
       const DB_VERSION = 1;
       const STORE_NAME = "scoreRecords";
 
-      // 初始化数据库
       function initDB() {
         return new Promise((resolve, reject) => {
           const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-          request.onerror = (event) => {
-            console.error("数据库打开失败:", event.target.error);
-            reject(event.target.error);
-          };
-
-          request.onsuccess = (event) => {
-            db = event.target.result;
-            console.log("数据库打开成功");
-            resolve(db);
-          };
-
+          request.onerror = (event) => reject(event.target.error);
+          request.onsuccess = (event) => { db = event.target.result; resolve(db); };
           request.onupgradeneeded = (event) => {
             const db = event.target.result;
             if (!db.objectStoreNames.contains(STORE_NAME)) {
@@ -424,361 +202,291 @@
         });
       }
 
-      // 保存或更新记录
       function saveRecord(record) {
         return new Promise((resolve, reject) => {
           const transaction = db.transaction([STORE_NAME], "readwrite");
           const store = transaction.objectStore(STORE_NAME);
           const request = store.put(record);
-
-          request.onsuccess = () => {
-            console.log("记录保存成功");
-            resolve();
-          };
-
-          request.onerror = (event) => {
-            console.error("记录保存失败:", event.target.error);
-            reject(event.target.error);
-          };
+          request.onsuccess = () => resolve();
+          request.onerror = (event) => reject(event.target.error);
         });
       }
 
-      // 根据QQ号获取记录
       function getRecordByQQ(qq) {
         return new Promise((resolve, reject) => {
           const transaction = db.transaction([STORE_NAME], "readonly");
           const store = transaction.objectStore(STORE_NAME);
           const request = store.get(qq);
-
-          request.onsuccess = (event) => {
-            resolve(event.target.result);
-          };
-
-          request.onerror = (event) => {
-            console.error("获取记录失败:", event.target.error);
-            reject(event.target.error);
-          };
+          request.onsuccess = (event) => resolve(event.target.result);
+          request.onerror = (event) => reject(event.target.error);
         });
       }
 
-      // 根据专业获取排名
-      function getRankingByMajor(major) {
+      function getAllApprovedLocalRecords() {
         return new Promise((resolve, reject) => {
           const transaction = db.transaction([STORE_NAME], "readonly");
           const store = transaction.objectStore(STORE_NAME);
-          const index = store.index("major");
-          const request = index.getAll(IDBKeyRange.only(major));
-
+          const request = store.getAll();
           request.onsuccess = (event) => {
-            const records = event.target.result;
-            // 按总分排序
-            records.sort((a, b) => b.total - a.total);
-            resolve(records);
+            let records = event.target.result || [];
+            resolve(records.filter(r => r.isApproved === true));
           };
-
-          request.onerror = (event) => {
-            console.error("获取排名失败:", event.target.error);
-            reject(event.target.error);
-          };
+          request.onerror = (event) => reject(event.target.error);
         });
       }
 
-      // 删除记录
-      function deleteRecord(qq) {
-        return new Promise((resolve, reject) => {
-          const transaction = db.transaction([STORE_NAME], "readwrite");
-          const store = transaction.objectStore(STORE_NAME);
-          const request = store.delete(qq);
-
-          request.onsuccess = () => {
-            console.log("记录删除成功");
-            resolve();
-          };
-
-          request.onerror = (event) => {
-            console.error("记录删除失败:", event.target.error);
-            reject(event.target.error);
-          };
-        });
-      }
-
-      // 初始化数据库
       initDB().catch((err) => console.error("数据库初始化失败:", err));
 
       function showStep(stepNumber) {
-        document
-          .querySelectorAll(".step-box")
-          .forEach((el) => el.classList.remove("active-step"));
-        document
-          .getElementById("step" + stepNumber)
-          .classList.add("active-step");
+        document.querySelectorAll(".step-box").forEach((el) => el.classList.remove("active-step"));
+        document.getElementById("step" + stepNumber).classList.add("active-step");
       }
 
-      // 登录核心逻辑：同时从云端和本地获取数据
+      function compressImageToBase64(file, callback) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+              const img = new Image();
+              img.onload = function() {
+                  const canvas = document.createElement('canvas');
+                  const ctx = canvas.getContext('2d');
+                  const MAX_WIDTH = 600;
+                  let width = img.width;
+                  let height = img.height;
+                  if (width > MAX_WIDTH) {
+                      height = Math.round((height * MAX_WIDTH) / width);
+                      width = MAX_WIDTH;
+                  }
+                  canvas.width = width; canvas.height = height;
+                  ctx.drawImage(img, 0, 0, width, height);
+                  callback(canvas.toDataURL('image/jpeg', 0.6));
+              };
+              img.src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+      }
+
       function loginWithQQ() {
-        let qq = document.getElementById("loginQQ").value;
-        if (!qq || qq.length < 5) {
-          alert("请输入正确的QQ号！");
-          return;
-        }
+        let qq = document.getElementById("loginQQ").value.trim();
+        if (!qq || qq.length < 5) { alert("请输入正确的QQ号！"); return; }
 
         let btn = document.getElementById("loginBtn");
         btn.innerText = "正在核对档案...";
         btn.disabled = true;
 
-        // 先从云端获取数据
         const query = Bmob.Query("ScoreRecord");
         query.equalTo("qq", "==", qq);
-        query
-          .find()
-          .then((res) => {
+        query.find().then((res) => {
             globalUserQQ = qq;
             document.getElementById("displayQQ").innerText = qq;
 
-            // 只要云端查到数据，就是老用户
             if (res.length > 0) {
               let myData = res[0];
               globalRecordId = myData.objectId;
+              globalIsApproved = myData.isApproved === true;
 
+              document.getElementById("ticketNum").value = myData.ticketNum || "";
               document.getElementById("majorSelect").value = myData.major;
               document.getElementById("sub1").value = myData.s1;
               document.getElementById("sub2").value = myData.s2;
               document.getElementById("sub3").value = myData.s3;
               document.getElementById("sub4").value = myData.s4;
+              document.getElementById("imgRequireTip").innerText = "(已上传过，如不更换可不选)";
 
-              // 同时保存到本地数据库
               const record = {
-                qq: qq,
-                major: myData.major,
-                s1: myData.s1,
-                s2: myData.s2,
-                s3: myData.s3,
-                s4: myData.s4,
-                total: myData.total,
+                qq: qq, ticketNum: myData.ticketNum, major: myData.major,
+                s1: myData.s1, s2: myData.s2, s3: myData.s3, s4: myData.s4,
+                total: myData.total, isApproved: globalIsApproved
               };
-              saveRecord(record).catch((err) =>
-                console.error("本地保存失败:", err),
-              );
+              saveRecord(record).catch((err) => console.error("本地保存失败:", err));
 
-              document.getElementById("rankFilter").value = myData.major;
-              showStep(3);
-              fetchRanking();
-            }
-            // 云端没查到，尝试从本地数据库获取
-            else {
-              getRecordByQQ(qq)
-                .then((localData) => {
-                  if (localData) {
-                    // 本地有数据，使用本地数据
-                    document.getElementById("majorSelect").value =
-                      localData.major;
-                    document.getElementById("sub1").value = localData.s1;
-                    document.getElementById("sub2").value = localData.s2;
-                    document.getElementById("sub3").value = localData.s3;
-                    document.getElementById("sub4").value = localData.s4;
-
-                    document.getElementById("rankFilter").value =
-                      localData.major;
-                    showStep(3);
-                    fetchRanking();
-                  } else {
-                    // 本地也没有数据，按新用户处理
-                    globalRecordId = "";
-                    // 清空表格，防止上一个人的痕迹串场
-                    document.getElementById("majorSelect").value = "";
-                    document.getElementById("sub1").value = "";
-                    document.getElementById("sub2").value = "";
-                    document.getElementById("sub3").value = "";
-                    document.getElementById("sub4").value = "";
-
-                    showStep(2);
-                  }
-                })
-                .catch((err) => {
-                  console.error("本地查询失败:", err);
-                  // 本地查询失败，按新用户处理
-                  globalRecordId = "";
-                  document.getElementById("majorSelect").value = "";
-                  document.getElementById("sub1").value = "";
-                  document.getElementById("sub2").value = "";
-                  document.getElementById("sub3").value = "";
-                  document.getElementById("sub4").value = "";
-
-                  showStep(2);
-                });
-            }
-
-            btn.innerText = "进入系统";
-            btn.disabled = false;
-          })
-          .catch((err) => {
-            console.error("云端查询失败:", err);
-            // 云端查询失败，尝试从本地数据库获取
-            getRecordByQQ(qq)
-              .then((localData) => {
+              if(globalIsApproved) {
+                  showStep(3); fetchRanking();
+              } else {
+                  showStep(5);
+              }
+            } else {
+              getRecordByQQ(qq).then((localData) => {
                 if (localData) {
-                  // 本地有数据，使用本地数据
-                  globalUserQQ = qq;
-                  document.getElementById("displayQQ").innerText = qq;
-                  document.getElementById("majorSelect").value =
-                    localData.major;
+                  document.getElementById("ticketNum").value = localData.ticketNum || "";
+                  document.getElementById("majorSelect").value = localData.major;
                   document.getElementById("sub1").value = localData.s1;
                   document.getElementById("sub2").value = localData.s2;
                   document.getElementById("sub3").value = localData.s3;
                   document.getElementById("sub4").value = localData.s4;
-
-                  document.getElementById("rankFilter").value = localData.major;
-                  showStep(3);
-                  fetchRanking();
+                  globalIsApproved = localData.isApproved === true;
+                  
+                  if(globalIsApproved){
+                     showStep(3); fetchRanking();
+                  } else {
+                     showStep(5);
+                  }
                 } else {
-                  // 本地也没有数据，提示网络失败
-                  alert("网络连接失败，请检查网络！");
+                  globalRecordId = ""; globalIsApproved = false;
+                  document.getElementById("ticketNum").value = ""; document.getElementById("majorSelect").value = "";
+                  document.getElementById("sub1").value = ""; document.getElementById("sub2").value = "";
+                  document.getElementById("sub3").value = ""; document.getElementById("sub4").value = "";
+                  document.getElementById("scoreImage").value = ""; 
+                  document.getElementById("imgRequireTip").innerText = "(新录入必须上传截图凭证)";
+                  showStep(2);
                 }
-              })
-              .catch((localErr) => {
-                console.error("本地查询也失败:", localErr);
-                alert("网络连接失败，请检查网络！");
-              })
-              .finally(() => {
-                btn.innerText = "进入系统";
-                btn.disabled = false;
-              });
+              }).catch(() => { showStep(2); });
+            }
+            btn.innerText = "进入系统"; btn.disabled = false;
+          }).catch((err) => {
+             getRecordByQQ(qq).then((localData) => {
+                if (localData) {
+                  globalUserQQ = qq; document.getElementById("displayQQ").innerText = qq;
+                  document.getElementById("ticketNum").value = localData.ticketNum || "";
+                  document.getElementById("majorSelect").value = localData.major;
+                  document.getElementById("sub1").value = localData.s1; document.getElementById("sub2").value = localData.s2;
+                  document.getElementById("sub3").value = localData.s3; document.getElementById("sub4").value = localData.s4;
+                  globalIsApproved = localData.isApproved === true;
+
+                  if(globalIsApproved){
+                     showStep(3); fetchRanking();
+                  } else { showStep(5); }
+                } else { alert("网络连接失败，请检查网络！"); }
+              }).catch(() => alert("网络连接失败，请检查网络！"))
+              .finally(() => { btn.innerText = "进入系统"; btn.disabled = false; });
           });
       }
 
       function goToModify() {
-        document.getElementById("submitBtn").innerText = "确认修改并重新提交";
+        document.getElementById("submitBtn").innerText = "确认修改数据 (将重新进入审核)";
         document.getElementById("submitBtn").disabled = false;
         showStep(2);
       }
 
       function submitCloudScore() {
+        let ticketNum = document.getElementById("ticketNum").value;
         let major = document.getElementById("majorSelect").value;
         let v1 = document.getElementById("sub1").value;
         let v2 = document.getElementById("sub2").value;
         let v3 = document.getElementById("sub3").value;
         let v4 = document.getElementById("sub4").value;
+        let scoreImageInput = document.getElementById('scoreImage');
 
-        if (!major) {
-          alert("请选择报考专业与方向！");
-          return;
-        }
-        if (v1 === "" || v2 === "" || v3 === "" || v4 === "") {
-          alert("每一科成绩都必须填写哦！");
-          return;
-        }
+        if (!ticketNum || ticketNum.length < 5) { alert("请填写正确的准考证号！"); return; }
+        if (!major) { alert("请选择报考方向！"); return; }
+        if (v1 === "" || v2 === "" || v3 === "" || v4 === "") { alert("每一科成绩都必须填写哦！"); return; }
+        if(!globalRecordId && scoreImageInput.files.length === 0) { alert("首次提交必须上传查分截图！"); return; }
 
-        let s1 = Number(v1);
-        let s2 = Number(v2);
-        let s3 = Number(v3);
-        let s4 = Number(v4);
+        let s1 = Number(v1); let s2 = Number(v2); let s3 = Number(v3); let s4 = Number(v4);
         let total = s1 + s2 + s3 + s4;
 
         let btn = document.getElementById("submitBtn");
-        btn.innerText = "数据传输中...";
-        btn.disabled = true;
+        btn.innerText = "数据传输中..."; btn.disabled = true;
 
-        // 同时保存到本地数据库
-        const record = {
-          qq: globalUserQQ,
-          major: major,
-          s1: s1,
-          s2: s2,
-          s3: s3,
-          s4: s4,
-          total: total,
-        };
-        saveRecord(record).catch((err) => console.error("本地保存失败:", err));
+        function uploadToCloud(base64ImageStr) {
+            saveRecord({
+              qq: globalUserQQ, ticketNum: ticketNum, major: major, 
+              s1: s1, s2: s2, s3: s3, s4: s4, total: total, isApproved: false
+            }).catch((err) => console.error("本地保存失败:", err));
 
-        // 保存到云端
-        const query = Bmob.Query("ScoreRecord");
-        // 如果有云端 ID，就执行更新；如果没有，就执行新建
-        if (globalRecordId) {
-          query.set("id", globalRecordId);
+            const query = Bmob.Query("ScoreRecord");
+            if (globalRecordId) { query.set("id", globalRecordId); }
+            query.set("qq", globalUserQQ); query.set("ticketNum", ticketNum); query.set("major", major);
+            query.set("s1", s1); query.set("s2", s2); query.set("s3", s3); query.set("s4", s4);
+            query.set("total", total); query.set("isApproved", false);
+            if (base64ImageStr) { query.set("scorePicText", base64ImageStr); }
+
+            query.save().then((res) => {
+                if (!globalRecordId) { globalRecordId = res.objectId; alert("初试成绩与凭证上传成功！"); } 
+                else { alert("成绩已成功更新，需重新审核！"); }
+                showStep(5);
+              })
+              .catch((err) => {
+                console.error("云端保存失败:", err);
+                alert("网络连接失败，数据已暂存本地，待网络恢复后请重新点击提交！");
+                btn.innerText = globalRecordId ? "确认修改数据 (将重新进入审核)" : "提交数据，等待管理员审核";
+                btn.disabled = false;
+              });
         }
-        query.set("qq", globalUserQQ);
-        query.set("major", major);
-        query.set("s1", s1);
-        query.set("s2", s2);
-        query.set("s3", s3);
-        query.set("s4", s4);
-        query.set("total", total);
 
-        query
-          .save()
-          .then((res) => {
-            if (!globalRecordId) {
-              globalRecordId = res.objectId;
-              alert("初试成绩录入成功！");
-            } else {
-              alert("成绩已成功更新！");
-            }
-
-            document.getElementById("rankFilter").value = major;
-            showStep(3);
-            fetchRanking();
-          })
-          .catch((err) => {
-            console.error("云端保存失败:", err);
-            // 云端保存失败，但本地已经保存成功
-            alert("网络连接失败，成绩已保存到本地");
-            document.getElementById("rankFilter").value = major;
-            showStep(3);
-            fetchRanking();
-          })
-          .finally(() => {
-            btn.innerText = globalRecordId ? "确认修改并重新提交" : "提交成绩";
-            btn.disabled = false;
-          });
+        if (scoreImageInput.files.length > 0) {
+            compressImageToBase64(scoreImageInput.files[0], uploadToCloud);
+        } else { uploadToCloud(null); }
       }
 
-      function fetchRanking() {
+      // 【核心聚合逻辑】
+      async function getAggregatedData(selectedMajor) {
+          let records = [];
+          try {
+              const query = Bmob.Query("ScoreRecord");
+              query.equalTo("isApproved", "==", true);
+              query.limit(1000);
+              records = await query.find();
+          } catch (e) {
+              console.warn("云端拉取失败，尝试使用本地缓存");
+              records = await getAllApprovedLocalRecords();
+          }
+
+          if (selectedMajor === 'ALL_11408') {
+              return records.filter(r => r.major && (r.major.includes('081200') || r.major.includes('0812Z1')));
+          } else if (selectedMajor === 'ALL_22408') {
+              return records.filter(r => r.major && r.major.includes('0854'));
+          } else if (selectedMajor === 'ALL_085404') {
+              return records.filter(r => r.major && r.major.includes('085404'));
+          } else if (selectedMajor === 'ALL_085405') {
+              return records.filter(r => r.major && r.major.includes('085405'));
+          } else if (selectedMajor === 'ALL_085410') {
+              return records.filter(r => r.major && r.major.includes('085410'));
+          } else {
+              return records.filter(r => r.major === selectedMajor);
+          }
+      }
+
+      function renderStatsBanner(records) {
+          const statsDiv = document.getElementById("statsBanner");
+          if(records.length === 0) {
+              statsDiv.innerHTML = ""; return;
+          }
+          let max = Math.max(...records.map(r => r.total));
+          let min = Math.min(...records.map(r => r.total));
+          let sum = records.reduce((acc, r) => acc + r.total, 0);
+          let avg = (sum / records.length).toFixed(1);
+          
+          statsDiv.innerHTML = `
+              <div class="stats-banner">
+                  <span>👥 已核人数: ${records.length}</span>
+                  <span>🔥 最高分: ${max}</span>
+                  <span>❄️ 最低分: ${min}</span>
+                  <span>📈 平均分: ${avg}</span>
+              </div>
+          `;
+      }
+
+      async function fetchRanking() {
         let selectedMajor = document.getElementById("rankFilter").value;
         let rankDiv = document.getElementById("rankingList");
-        rankDiv.innerHTML = "正在拉取 " + selectedMajor + " 的排名...";
+        rankDiv.innerHTML = "正在拉取审核数据...";
+        document.getElementById("statsBanner").innerHTML = "";
 
-        // 先从云端获取数据
-        const query = Bmob.Query("ScoreRecord");
-        query.equalTo("major", "==", selectedMajor);
-        query.order("-total");
-        query.limit(100);
-
-        query
-          .find()
-          .then((records) => {
+        try {
+            let records = await getAggregatedData(selectedMajor);
+            records.sort((a, b) => b.total - a.total);
+            
+            renderStatsBanner(records);
             displayRanking(records, rankDiv, selectedMajor);
-          })
-          .catch((err) => {
-            console.error("云端排名获取失败:", err);
-            // 云端获取失败，尝试从本地数据库获取
-            getRankingByMajor(selectedMajor)
-              .then((localRecords) => {
-                displayRanking(localRecords, rankDiv, selectedMajor);
-              })
-              .catch((localErr) => {
-                console.error("本地排名获取失败:", localErr);
-                rankDiv.innerHTML = "数据获取失败，请检查网络。";
-              });
-          });
+        } catch (e) {
+            rankDiv.innerHTML = "数据获取失败，请检查网络。";
+        }
       }
 
-      // 显示排名
       function displayRanking(records, rankDiv, selectedMajor) {
         let htmlStr = "";
         if (records.length === 0) {
-          rankDiv.innerHTML = `<div style="text-align:center; color:#999; margin-top:20px;">该方向目前还没有人录入成绩，快来抢占沙发！</div>`;
+          rankDiv.innerHTML = `<div style="text-align:center; color:#999; margin-top:20px;">该范围暂无已审核通过的成绩数据。</div>`;
           return;
         }
-
         records.forEach((item, index) => {
-          // 判断是不是当前登录的 QQ 号，高亮显示自己的成绩
-          let isMe = item.qq === globalUserQQ;
-          let bgStyle = isMe
-            ? "background: #fff3cd; border-left: 5px solid #f39c12;"
-            : "";
-          let meTag = isMe
-            ? `<span style="background:#e74c3c; color:white; padding:2px 6px; border-radius:4px; font-size:10px; margin-left:5px;">我</span>`
-            : "";
+          let qq = item.qq;
+          let isMe = qq === globalUserQQ;
+          let bgStyle = isMe ? "background: #fff3cd; border-left: 5px solid #f39c12;" : "";
+          let meTag = isMe ? `<span style="background:#e74c3c; color:white; padding:2px 6px; border-radius:4px; font-size:10px; margin-left:5px;">我</span>` : "";
+
+          // 大盘模式下，额外显示他们的具体专业方向
+          let majorInfo = selectedMajor.startsWith('ALL_') ? `<div style="font-size:11px; color:#0056b3; margin-top:3px; word-break: break-all;">${item.major}</div>` : "";
 
           htmlStr += `
                 <div class="rank-item" style="${bgStyle}">
@@ -786,6 +494,7 @@
                     <div class="rank-detail">
                         <strong>总分：<span style="color:#e74c3c; font-size:16px;">${item.total}</span></strong> ${meTag}<br>
                         <span style="font-size:12px; color:#555;">政:${item.s1} | 英:${item.s2} | 数:${item.s3} | 408:${item.s4}</span>
+                        ${majorInfo}
                     </div>
                 </div>
             `;
@@ -793,157 +502,70 @@
         rankDiv.innerHTML = htmlStr;
       }
 
-      // 退出清空内存状态，回归初始
       function logout() {
-        globalUserQQ = "";
-        globalRecordId = "";
+        globalUserQQ = ""; globalRecordId = ""; globalIsApproved = false;
         document.getElementById("loginQQ").value = "";
         showStep(1);
       }
 
-      // 显示图表页面
       function showCharts() {
-        // 初始化图表专业选择器
-        document.getElementById("chartMajorSelect").innerHTML =
-          document.getElementById("majorSelect").innerHTML;
-        // 默认为当前选择的专业
-        document.getElementById("chartMajorSelect").value =
-          document.getElementById("rankFilter").value;
-        // 显示图表页面
+        document.getElementById("chartMajorSelect").value = document.getElementById("rankFilter").value;
         showStep(4);
-        // 更新图表
         updateChart();
       }
 
-      // 图表实例
       let chartInstance;
 
-      // 更新图表
-      function updateChart() {
+      async function updateChart() {
         const selectedMajor = document.getElementById("chartMajorSelect").value;
-        const selectedSubject =
-          document.getElementById("chartSubjectSelect").value;
+        const selectedSubject = document.getElementById("chartSubjectSelect").value;
         const chartContainer = document.getElementById("chartContainer");
+        const subjectNames = { total: "总分", s1: "政治", s2: "英语", s3: "数学", s4: "专业课(408)" };
 
-        // 科目名称映射
-        const subjectNames = {
-          total: "总分",
-          s1: "政治",
-          s2: "英语",
-          s3: "数学",
-          s4: "专业课(408)",
-        };
+        if (!chartInstance) { chartInstance = echarts.init(chartContainer); }
 
-        // 初始化图表实例
-        if (!chartInstance) {
-          chartInstance = echarts.init(chartContainer);
-        }
+        try {
+            let records = await getAggregatedData(selectedMajor);
+            records.sort((a, b) => b[selectedSubject] - a[selectedSubject]);
 
-        // 从本地数据库获取数据
-        getRankingByMajor(selectedMajor)
-          .then((records) => {
-            // 如果本地没有数据，尝试从云端获取
-            if (records.length === 0) {
-              const query = Bmob.Query("ScoreRecord");
-              query.equalTo("major", "==", selectedMajor);
-              query.order("-total");
-              return query.find();
-            }
-            return records;
-          })
-          .then((records) => {
-            // 处理数据
-            const sortedRecords = records.sort(
-              (a, b) => a[selectedSubject] - b[selectedSubject],
-            );
-            const ranks = sortedRecords.map((_, index) => index + 1);
-            const scores = sortedRecords.map(
-              (record) => record[selectedSubject],
-            );
-            const names = sortedRecords.map(
-              (record) => `#${record.qq.slice(-4)}`,
-            );
+            const ranks = records.map((_, index) => index + 1);
+            const scores = records.map((r) => r[selectedSubject]);
+            const names = records.map((r) => `#${r.qq.toString().slice(-4)}`);
+            
+            const selectEl = document.getElementById("chartMajorSelect");
+            const titlePrefix = selectEl.options[selectEl.selectedIndex].text.replace('【大盘】', '').replace('【聚合】', '');
 
-            // 配置图表选项
             const option = {
-              title: {
-                text:
-                  selectedMajor +
-                  " " +
-                  subjectNames[selectedSubject] +
-                  "成绩趋势",
-                left: "center",
-              },
+              title: { text: titlePrefix + "\\n" + subjectNames[selectedSubject] + "分布", left: "center", textStyle: { fontSize: 14 } },
               tooltip: {
                 trigger: "axis",
                 formatter: function (params) {
                   const index = params[0].dataIndex;
-                  return `排名: ${ranks[index]}<br/>${subjectNames[selectedSubject]}: ${scores[index]}<br/>用户: ${names[index]}`;
+                  return `排名: ${ranks[index]}<br/>${subjectNames[selectedSubject]}: ${scores[index]}<br/>尾号: ${names[index]}<br/><span style="font-size:10px;">${records[index].major}</span>`;
                 },
               },
-              xAxis: {
-                type: "category",
-                data: ranks,
-                name: "排名",
-                nameLocation: "middle",
-                nameGap: 30,
-              },
-              yAxis: {
-                type: "value",
-                name: subjectNames[selectedSubject],
-                nameLocation: "middle",
-                nameGap: 50,
-              },
-              series: [
-                {
-                  data: scores,
-                  type: "line",
-                  smooth: true,
-                  symbol: "circle",
-                  symbolSize: 8,
-                  lineStyle: {
-                    width: 3,
-                  },
-                  itemStyle: {
-                    color: "#0056b3",
-                  },
+              xAxis: { type: "category", data: ranks, name: "排名", nameLocation: "middle", nameGap: 30 },
+              yAxis: { type: "value", name: subjectNames[selectedSubject], nameLocation: "middle", nameGap: 50 },
+              series: [{
+                  data: scores, type: "line", smooth: true, symbol: "circle", symbolSize: 6,
+                  lineStyle: { width: 3 }, itemStyle: { color: "#0056b3" },
                   areaStyle: {
                     color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                      {
-                        offset: 0,
-                        color: "rgba(0, 86, 179, 0.3)",
-                      },
-                      {
-                        offset: 1,
-                        color: "rgba(0, 86, 179, 0.1)",
-                      },
+                      { offset: 0, color: "rgba(0, 86, 179, 0.3)" },
+                      { offset: 1, color: "rgba(0, 86, 179, 0.1)" },
                     ]),
                   },
-                },
-              ],
+              }],
             };
-
-            // 设置图表选项
             chartInstance.setOption(option);
-          })
-          .catch((err) => {
+        } catch(err) {
             console.error("获取图表数据失败:", err);
-            // 显示错误信息
-            chartInstance.setOption({
-              title: {
-                text: "获取数据失败",
-                left: "center",
-              },
-              series: [],
-            });
-          });
+            chartInstance.setOption({ title: { text: "获取数据失败或暂无数据", left: "center" }, series: [] });
+        }
       }
 
-      // 窗口大小变化时，重新调整图表大小
       window.addEventListener("resize", function () {
-        if (chartInstance) {
-          chartInstance.resize();
-        }
+        if (chartInstance) { chartInstance.resize(); }
       });
     </script>
   </body>
