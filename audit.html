@@ -1,0 +1,730 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>成绩审核</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Arial", sans-serif;
+        background-color: #f5f7fa;
+        color: #333;
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 20px auto;
+        padding: 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #2c3e50;
+      }
+
+      .filter-section {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+      }
+
+      .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      label {
+        font-weight: bold;
+        font-size: 14px;
+        color: #555;
+      }
+
+      input,
+      select {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+
+      button {
+        padding: 8px 16px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s;
+      }
+
+      button:hover {
+        background-color: #2980b9;
+      }
+
+      .table-container {
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
+      th,
+      td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+
+      th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+      }
+
+      tr:hover {
+        background-color: #f5f5f5;
+      }
+
+      .btn-enable {
+        background-color: #27ae60;
+      }
+
+      .btn-enable:hover {
+        background-color: #229954;
+      }
+
+      .btn-disable {
+        background-color: #e74c3c;
+      }
+
+      .btn-disable:hover {
+        background-color: #c0392b;
+      }
+
+      .message {
+        margin-top: 20px;
+        padding: 10px;
+        border-radius: 4px;
+        text-align: center;
+      }
+
+      .success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      .error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+
+      .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+        gap: 5px;
+      }
+
+      .pagination button {
+        padding: 5px 10px;
+        background-color: #f8f9fa;
+        color: #333;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .pagination button.active {
+        background-color: #3498db;
+        color: white;
+        border-color: #3498db;
+      }
+
+      .pagination button:hover:not(.active) {
+        background-color: #e9ecef;
+      }
+
+      .batch-actions {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .batch-actions button {
+        padding: 8px 16px;
+      }
+
+      .header-checkbox {
+        width: 18px;
+        height: 18px;
+      }
+
+      .row-checkbox {
+        width: 16px;
+        height: 16px;
+      }
+
+      .column-toggle {
+        position: relative;
+        display: inline-block;
+      }
+
+      .column-toggle button {
+        background-color: #f8f9fa;
+        color: #333;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        padding: 4px 8px;
+        cursor: pointer;
+      }
+
+      .column-toggle .dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background-color: white;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        padding: 10px;
+        min-width: 150px;
+        display: none;
+      }
+
+      .column-toggle .dropdown.show {
+        display: block;
+      }
+
+      .column-toggle .dropdown label {
+        display: block;
+        margin-bottom: 5px;
+        cursor: pointer;
+      }
+
+      .column-toggle .dropdown input[type="checkbox"] {
+        margin-right: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>成绩审核</h1>
+
+      <div class="filter-section">
+        <div class="filter-group">
+          <label for="majorFilter">专业方向</label>
+          <select id="majorFilter">
+            <option value="">全部</option>
+            <!-- 专业方向选项将通过JavaScript动态添加 -->
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="qqSearch">QQ号查询</label>
+          <input type="text" id="qqSearch" placeholder="输入QQ号" />
+        </div>
+
+        <div class="filter-group" style="align-self: flex-end">
+          <button onclick="fetchAllData()">查询</button>
+        </div>
+
+        <div class="filter-group" style="align-self: flex-end">
+          <div class="column-toggle">
+            <button onclick="toggleColumnDropdown()">列显示</button>
+            <div id="columnDropdown" class="dropdown">
+              <label
+                ><input type="checkbox" checked onchange="toggleColumn('qq')" />
+                QQ号</label
+              >
+              <label
+                ><input
+                  type="checkbox"
+                  checked
+                  onchange="toggleColumn('major')"
+                />
+                专业方向</label
+              >
+              <label
+                ><input
+                  type="checkbox"
+                  checked
+                  onchange="toggleColumn('politics')"
+                />
+                政治</label
+              >
+              <label
+                ><input
+                  type="checkbox"
+                  checked
+                  onchange="toggleColumn('english')"
+                />
+                英语</label
+              >
+              <label
+                ><input
+                  type="checkbox"
+                  checked
+                  onchange="toggleColumn('math')"
+                />
+                数学</label
+              >
+              <label
+                ><input
+                  type="checkbox"
+                  checked
+                  onchange="toggleColumn('professional')"
+                />
+                专业课</label
+              >
+              <label
+                ><input
+                  type="checkbox"
+                  checked
+                  onchange="toggleColumn('total')"
+                />
+                总分</label
+              >
+              <label
+                ><input
+                  type="checkbox"
+                  checked
+                  onchange="toggleColumn('createTime')"
+                />
+                创建时间</label
+              >
+              <label
+                ><input
+                  type="checkbox"
+                  checked
+                  onchange="toggleColumn('updateTime')"
+                />
+                更新时间</label
+              >
+              <label
+                ><input
+                  type="checkbox"
+                  checked
+                  onchange="toggleColumn('status')"
+                />
+                状态</label
+              >
+              <label
+                ><input
+                  type="checkbox"
+                  checked
+                  onchange="toggleColumn('action')"
+                />
+                操作</label
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="batch-actions" id="batchActions" style="display: none">
+        <input
+          type="checkbox"
+          id="headerCheckbox"
+          class="header-checkbox"
+          onchange="toggleSelectAll()"
+        />
+        <label for="headerCheckbox">全选</label>
+        <button onclick="batchEnable()">批量启用</button>
+        <button onclick="batchDisable()">批量禁用</button>
+      </div>
+
+      <div class="table-container">
+        <table id="scoreTable">
+          <thead>
+            <tr>
+              <th style="width: 50px">
+                <input
+                  type="checkbox"
+                  id="selectAll"
+                  class="header-checkbox"
+                  onchange="toggleSelectAll()"
+                />
+              </th>
+              <th data-column="qq">QQ号</th>
+              <th data-column="major">专业方向</th>
+              <th data-column="politics">政治</th>
+              <th data-column="english">英语</th>
+              <th data-column="math">数学</th>
+              <th data-column="professional">专业课</th>
+              <th data-column="total">总分</th>
+              <th data-column="createTime">创建时间</th>
+              <th data-column="updateTime">更新时间</th>
+              <th data-column="status">状态</th>
+              <th data-column="action">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- 数据将通过JavaScript动态添加 -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination" id="pagination">
+        <!-- 分页按钮将通过JavaScript动态添加 -->
+      </div>
+
+      <div id="message" class="message" style="display: none"></div>
+    </div>
+
+    <script>
+      // 后端API地址
+      const API_BASE_URL = "http://47.105.33.142:8080/api/score";
+
+      // 通用API请求函数
+      async function apiRequest(endpoint, method = "GET", data = null) {
+        const url = `${API_BASE_URL}${endpoint}`;
+        const options = {
+          method,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "omit",
+        };
+
+        if (data) {
+          options.body = JSON.stringify(data);
+        }
+
+        try {
+          const response = await fetch(url, options);
+          if (!response.ok) {
+            throw new Error(`API请求失败: ${response.status}`);
+          }
+          return await response.json();
+        } catch (error) {
+          console.error("API请求错误:", error);
+          throw error;
+        }
+      }
+
+      // 获取所有数据
+      async function fetchAllData() {
+        try {
+          const major =
+            document.getElementById("majorFilter").value ||
+            "081200 计算机科学与技术 (00不区分)";
+          const qqSearch = document.getElementById("qqSearch").value;
+
+          // 使用后端分页API
+          const res = await apiRequest(
+            `/records?major=${encodeURIComponent(major)}&page=${currentPage}&pageSize=${pageSize}`,
+          );
+          if (res.success && res.data) {
+            const paginationData = res.data;
+            // 转换数据格式
+            let records = paginationData.data.map((item) => ({
+              qq: item.qqNumber,
+              major: item.examDirection,
+              politics: item.politicsScore,
+              english: item.englishScore,
+              math: item.mathScore,
+              professional: item.professionalScore,
+              total: item.totalScore,
+              createTime: item.createTime,
+              updateTime: item.updateTime,
+              isDeleted: item.isDeleted,
+            }));
+
+            // 根据QQ号筛选
+            if (qqSearch) {
+              records = records.filter((item) => item.qq.includes(qqSearch));
+            }
+
+            allRecords = records;
+            renderTable(records);
+            // 渲染分页控件
+            renderPagination(paginationData.total);
+            showMessage("数据加载成功", "success");
+          } else {
+            throw new Error("获取数据失败");
+          }
+        } catch (error) {
+          console.error("获取数据失败:", error);
+          showMessage("数据加载失败，请检查网络", "error");
+        }
+      }
+
+      // 切换状态
+      async function toggleStatus(qq, currentStatus) {
+        try {
+          const newStatus = currentStatus === 0 ? 1 : 0;
+
+          // 构造更新数据
+          const updateData = {
+            qq: qq,
+            isDeleted: newStatus,
+          };
+
+          const res = await apiRequest("/update-status", "POST", updateData);
+          if (res.success) {
+            showMessage("状态更新成功", "success");
+            // 重新加载数据
+            fetchAllData();
+          } else {
+            throw new Error("状态更新失败");
+          }
+        } catch (error) {
+          console.error("状态更新失败:", error);
+          showMessage("状态更新失败，请检查网络", "error");
+        }
+      }
+
+      // 全局变量
+      let allRecords = []; // 所有数据
+      let currentPage = 1;
+      const pageSize = 10;
+
+      // 显示消息
+      function showMessage(text, type) {
+        const messageDiv = document.getElementById("message");
+        messageDiv.textContent = text;
+        messageDiv.className = `message ${type}`;
+        messageDiv.style.display = "block";
+
+        // 3秒后隐藏消息
+        setTimeout(() => {
+          messageDiv.style.display = "none";
+        }, 3000);
+      }
+
+      // 列显示/隐藏控制
+      function toggleColumnDropdown() {
+        const dropdown = document.getElementById("columnDropdown");
+        dropdown.classList.toggle("show");
+      }
+
+      // 切换列显示/隐藏
+      function toggleColumn(column) {
+        const table = document.getElementById("scoreTable");
+        const thElements = table.querySelectorAll(
+          `th[data-column="${column}"]`,
+        );
+        const tdElements = table.querySelectorAll(
+          `td[data-column="${column}"]`,
+        );
+
+        const checkbox = document.querySelector(
+          `input[type="checkbox"][onchange="toggleColumn('${column}')"]`,
+        );
+        const display = checkbox.checked ? "table-cell" : "none";
+
+        thElements.forEach((th) => (th.style.display = display));
+        tdElements.forEach((td) => (td.style.display = display));
+      }
+
+      // 全选/取消全选
+      function toggleSelectAll() {
+        const selectAllCheckbox = document.getElementById("selectAll");
+        const rowCheckboxes = document.querySelectorAll(".row-checkbox");
+
+        rowCheckboxes.forEach((checkbox) => {
+          checkbox.checked = selectAllCheckbox.checked;
+        });
+      }
+
+      // 批量启用
+      async function batchEnable() {
+        await batchUpdateStatus(0);
+      }
+
+      // 批量禁用
+      async function batchDisable() {
+        await batchUpdateStatus(1);
+      }
+
+      // 批量更新状态
+      async function batchUpdateStatus(newStatus) {
+        const rowCheckboxes = document.querySelectorAll(
+          ".row-checkbox:checked",
+        );
+        const selectedQqs = Array.from(rowCheckboxes).map(
+          (checkbox) => checkbox.value,
+        );
+
+        if (selectedQqs.length === 0) {
+          showMessage("请选择要操作的记录", "error");
+          return;
+        }
+
+        try {
+          // 批量更新状态
+          const updateData = {
+            qqs: selectedQqs,
+            isDeleted: newStatus,
+          };
+
+          const res = await apiRequest(
+            "/batch-update-status",
+            "POST",
+            updateData,
+          );
+          if (res.success) {
+            showMessage(res.message, "success");
+            // 重新加载数据
+            fetchAllData();
+          } else {
+            throw new Error("批量更新失败");
+          }
+        } catch (error) {
+          console.error("批量更新失败:", error);
+          showMessage("批量更新失败，请检查网络", "error");
+        }
+      }
+
+      // 渲染表格
+      function renderTable(records) {
+        const tbody = document
+          .getElementById("scoreTable")
+          .querySelector("tbody");
+        tbody.innerHTML = "";
+
+        if (records.length === 0) {
+          const row = document.createElement("tr");
+          row.innerHTML = `<td colspan="12" style="text-align: center;">暂无数据</td>`;
+          tbody.appendChild(row);
+          document.getElementById("batchActions").style.display = "none";
+          renderPagination(0);
+          return;
+        }
+
+        // 显示批量操作按钮
+        document.getElementById("batchActions").style.display = "flex";
+
+        // 渲染分页
+        renderPagination(records.length);
+
+        // 计算当前页显示的数据
+        const start = (currentPage - 1) * pageSize;
+        const end = start + pageSize;
+        const currentRecords = records.slice(start, end);
+
+        currentRecords.forEach((record) => {
+          const row = document.createElement("tr");
+
+          // 格式化时间
+          const createTime = new Date(record.createTime).toLocaleString();
+          const updateTime = new Date(record.updateTime).toLocaleString();
+
+          // 状态文本
+          const statusText = record.isDeleted === 0 ? "已启用" : "未启用";
+
+          // 按钮文本和类
+          const buttonText = record.isDeleted === 0 ? "不启用" : "启用";
+          const buttonClass =
+            record.isDeleted === 0 ? "btn-disable" : "btn-enable";
+
+          row.innerHTML = `
+              <td><input type="checkbox" class="row-checkbox" value="${record.qq}"></td>
+              <td data-column="qq">${record.qq}</td>
+              <td data-column="major">${record.major}</td>
+              <td data-column="politics">${record.politics}</td>
+              <td data-column="english">${record.english}</td>
+              <td data-column="math">${record.math}</td>
+              <td data-column="professional">${record.professional}</td>
+              <td data-column="total">${record.total}</td>
+              <td data-column="createTime">${createTime}</td>
+              <td data-column="updateTime">${updateTime}</td>
+              <td data-column="status">${statusText}</td>
+              <td data-column="action"><button class="${buttonClass}" onclick="toggleStatus('${record.qq}', ${record.isDeleted})">${buttonText}</button></td>
+          `;
+
+          tbody.appendChild(row);
+        });
+      }
+
+      // 渲染分页
+      function renderPagination(totalRecords) {
+        const pagination = document.getElementById("pagination");
+        pagination.innerHTML = "";
+
+        const totalPages = Math.ceil(totalRecords / pageSize);
+
+        // 上一页按钮
+        const prevButton = document.createElement("button");
+        prevButton.textContent = "上一页";
+        prevButton.disabled = currentPage === 1;
+        prevButton.onclick = () => {
+          if (currentPage > 1) {
+            currentPage--;
+            renderTable(allRecords);
+          }
+        };
+        pagination.appendChild(prevButton);
+
+        // 页码按钮
+        for (let i = 1; i <= totalPages; i++) {
+          const pageButton = document.createElement("button");
+          pageButton.textContent = i;
+          pageButton.className = currentPage === i ? "active" : "";
+          pageButton.onclick = () => {
+            currentPage = i;
+            renderTable(allRecords);
+          };
+          pagination.appendChild(pageButton);
+        }
+
+        // 下一页按钮
+        const nextButton = document.createElement("button");
+        nextButton.textContent = "下一页";
+        nextButton.disabled = currentPage === totalPages || totalPages === 0;
+        nextButton.onclick = () => {
+          if (currentPage < totalPages) {
+            currentPage++;
+            renderTable(allRecords);
+          }
+        };
+        pagination.appendChild(nextButton);
+      }
+
+      // 初始化
+      function init() {
+        // 添加专业方向选项
+        const majorSelect = document.getElementById("majorFilter");
+        const majors = [
+          "081200 计算机科学与技术 (00不区分)",
+          "083500 软件工程 (00不区分)",
+          "085400 电子信息 (01计算机技术)",
+          "085400 电子信息 (02软件工程)",
+        ];
+
+        majors.forEach((major) => {
+          const option = document.createElement("option");
+          option.value = major;
+          option.textContent = major;
+          majorSelect.appendChild(option);
+        });
+
+        // 初始加载数据
+        fetchAllData();
+      }
+
+      // 页面加载完成后初始化
+      window.onload = init;
+    </script>
+  </body>
+</html>

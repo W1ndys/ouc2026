@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>中国海洋大学26信息学部初试录分与排名</title>
-    <script src="https://cdn.jsdelivr.net/npm/hydrogen-js-sdk/dist/Bmob-2.5.1.min.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <style>
       body {
@@ -382,8 +382,6 @@
     </div>
 
     <script>
-      // Bmob 密钥初始化
-      Bmob.initialize("3214f8afece0391a", "ouc2026score1234");
       document.getElementById("rankFilter").innerHTML =
         document.getElementById("majorSelect").innerHTML;
 
@@ -391,119 +389,61 @@
       let globalUserQQ = "";
       let globalRecordId = "";
 
-      // SQLite 数据库操作
-      let db;
-      const DB_NAME = "OUC2026ScoreDB";
-      const DB_VERSION = 1;
-      const STORE_NAME = "scoreRecords";
+      // 后端API地址
+      const API_BASE_URL = "http://47.105.33.142:8080/api/score";
 
-      // 初始化数据库
-      function initDB() {
-        return new Promise((resolve, reject) => {
-          const request = indexedDB.open(DB_NAME, DB_VERSION);
+      // 通用API请求函数
+      async function apiRequest(endpoint, method = "GET", data = null) {
+        const url = `${API_BASE_URL}${endpoint}`;
+        const options = {
+          method,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "omit",
+        };
 
-          request.onerror = (event) => {
-            console.error("数据库打开失败:", event.target.error);
-            reject(event.target.error);
-          };
+        if (data) {
+          options.body = JSON.stringify(data);
+        }
 
-          request.onsuccess = (event) => {
-            db = event.target.result;
-            console.log("数据库打开成功");
-            resolve(db);
-          };
-
-          request.onupgradeneeded = (event) => {
-            const db = event.target.result;
-            if (!db.objectStoreNames.contains(STORE_NAME)) {
-              const store = db.createObjectStore(STORE_NAME, { keyPath: "qq" });
-              store.createIndex("major", "major", { unique: false });
-              store.createIndex("total", "total", { unique: false });
-            }
-          };
-        });
+        try {
+          const response = await fetch(url, options);
+          if (!response.ok) {
+            throw new Error(`API请求失败: ${response.status}`);
+          }
+          return await response.json();
+        } catch (error) {
+          console.error("API请求错误:", error);
+          // CORS错误处理
+          if (error.message.includes("CORS")) {
+            console.error("CORS错误，请确保后端API已配置正确的CORS设置");
+            // 尝试使用本地数据作为降级方案
+            throw new Error("网络连接失败，请检查网络！");
+          }
+          throw error;
+        }
       }
 
-      // 保存或更新记录
-      function saveRecord(record) {
-        return new Promise((resolve, reject) => {
-          const transaction = db.transaction([STORE_NAME], "readwrite");
-          const store = transaction.objectStore(STORE_NAME);
-          const request = store.put(record);
-
-          request.onsuccess = () => {
-            console.log("记录保存成功");
-            resolve();
-          };
-
-          request.onerror = (event) => {
-            console.error("记录保存失败:", event.target.error);
-            reject(event.target.error);
-          };
-        });
+      // 用户登录与数据获取
+      async function loginUser(qq) {
+        return apiRequest("/login", "POST", { qq });
       }
 
-      // 根据QQ号获取记录
-      function getRecordByQQ(qq) {
-        return new Promise((resolve, reject) => {
-          const transaction = db.transaction([STORE_NAME], "readonly");
-          const store = transaction.objectStore(STORE_NAME);
-          const request = store.get(qq);
-
-          request.onsuccess = (event) => {
-            resolve(event.target.result);
-          };
-
-          request.onerror = (event) => {
-            console.error("获取记录失败:", event.target.error);
-            reject(event.target.error);
-          };
-        });
+      // 提交或更新成绩
+      async function submitScore(data) {
+        return apiRequest("/submit", "POST", data);
       }
 
-      // 根据专业获取排名
-      function getRankingByMajor(major) {
-        return new Promise((resolve, reject) => {
-          const transaction = db.transaction([STORE_NAME], "readonly");
-          const store = transaction.objectStore(STORE_NAME);
-          const index = store.index("major");
-          const request = index.getAll(IDBKeyRange.only(major));
-
-          request.onsuccess = (event) => {
-            const records = event.target.result;
-            // 按总分排序
-            records.sort((a, b) => b.total - a.total);
-            resolve(records);
-          };
-
-          request.onerror = (event) => {
-            console.error("获取排名失败:", event.target.error);
-            reject(event.target.error);
-          };
-        });
+      // 获取排名
+      async function getRanking(major) {
+        return apiRequest(`/ranking?major=${encodeURIComponent(major)}`);
       }
 
-      // 删除记录
-      function deleteRecord(qq) {
-        return new Promise((resolve, reject) => {
-          const transaction = db.transaction([STORE_NAME], "readwrite");
-          const store = transaction.objectStore(STORE_NAME);
-          const request = store.delete(qq);
-
-          request.onsuccess = () => {
-            console.log("记录删除成功");
-            resolve();
-          };
-
-          request.onerror = (event) => {
-            console.error("记录删除失败:", event.target.error);
-            reject(event.target.error);
-          };
-        });
+      // 获取图表数据
+      async function getChartData(major) {
+        return apiRequest(`/chart?major=${encodeURIComponent(major)}`);
       }
-
-      // 初始化数据库
-      initDB().catch((err) => console.error("数据库初始化失败:", err));
 
       function showStep(stepNumber) {
         document
@@ -514,8 +454,8 @@
           .classList.add("active-step");
       }
 
-      // 登录核心逻辑：同时从云端和本地获取数据
-      function loginWithQQ() {
+      // 登录核心逻辑：从MySQL获取数据
+      async function loginWithQQ() {
         let qq = document.getElementById("loginQQ").value;
         if (!qq || qq.length < 5) {
           alert("请输入正确的QQ号！");
@@ -526,124 +466,46 @@
         btn.innerText = "正在核对档案...";
         btn.disabled = true;
 
-        // 先从云端获取数据
-        const query = Bmob.Query("ScoreRecord");
-        query.equalTo("qq", "==", qq);
-        query
-          .find()
-          .then((res) => {
-            globalUserQQ = qq;
-            document.getElementById("displayQQ").innerText = qq;
+        try {
+          // 从MySQL数据库获取数据
+          const res = await loginUser(qq);
+          globalUserQQ = qq;
+          document.getElementById("displayQQ").innerText = qq;
 
-            // 只要云端查到数据，就是老用户
-            if (res.length > 0) {
-              let myData = res[0];
-              globalRecordId = myData.objectId;
+          // 只要数据库查到数据，就是老用户
+          if (res.success && res.data) {
+            let myData = res.data;
+            globalRecordId = myData.qqNumber; // 使用qqNumber作为记录ID
 
-              document.getElementById("majorSelect").value = myData.major;
-              document.getElementById("sub1").value = myData.s1;
-              document.getElementById("sub2").value = myData.s2;
-              document.getElementById("sub3").value = myData.s3;
-              document.getElementById("sub4").value = myData.s4;
+            document.getElementById("majorSelect").value = myData.examDirection;
+            document.getElementById("sub1").value = myData.politicsScore;
+            document.getElementById("sub2").value = myData.englishScore;
+            document.getElementById("sub3").value = myData.mathScore;
+            document.getElementById("sub4").value = myData.professionalScore;
 
-              // 同时保存到本地数据库
-              const record = {
-                qq: qq,
-                major: myData.major,
-                s1: myData.s1,
-                s2: myData.s2,
-                s3: myData.s3,
-                s4: myData.s4,
-                total: myData.total,
-              };
-              saveRecord(record).catch((err) =>
-                console.error("本地保存失败:", err),
-              );
+            document.getElementById("rankFilter").value = myData.examDirection;
+            showStep(3);
+            fetchRanking();
+          }
+          // 数据库没查到，按新用户处理
+          else {
+            globalRecordId = "";
+            // 清空表格，防止上一个人的痕迹串场
+            document.getElementById("majorSelect").value = "";
+            document.getElementById("sub1").value = "";
+            document.getElementById("sub2").value = "";
+            document.getElementById("sub3").value = "";
+            document.getElementById("sub4").value = "";
 
-              document.getElementById("rankFilter").value = myData.major;
-              showStep(3);
-              fetchRanking();
-            }
-            // 云端没查到，尝试从本地数据库获取
-            else {
-              getRecordByQQ(qq)
-                .then((localData) => {
-                  if (localData) {
-                    // 本地有数据，使用本地数据
-                    document.getElementById("majorSelect").value =
-                      localData.major;
-                    document.getElementById("sub1").value = localData.s1;
-                    document.getElementById("sub2").value = localData.s2;
-                    document.getElementById("sub3").value = localData.s3;
-                    document.getElementById("sub4").value = localData.s4;
-
-                    document.getElementById("rankFilter").value =
-                      localData.major;
-                    showStep(3);
-                    fetchRanking();
-                  } else {
-                    // 本地也没有数据，按新用户处理
-                    globalRecordId = "";
-                    // 清空表格，防止上一个人的痕迹串场
-                    document.getElementById("majorSelect").value = "";
-                    document.getElementById("sub1").value = "";
-                    document.getElementById("sub2").value = "";
-                    document.getElementById("sub3").value = "";
-                    document.getElementById("sub4").value = "";
-
-                    showStep(2);
-                  }
-                })
-                .catch((err) => {
-                  console.error("本地查询失败:", err);
-                  // 本地查询失败，按新用户处理
-                  globalRecordId = "";
-                  document.getElementById("majorSelect").value = "";
-                  document.getElementById("sub1").value = "";
-                  document.getElementById("sub2").value = "";
-                  document.getElementById("sub3").value = "";
-                  document.getElementById("sub4").value = "";
-
-                  showStep(2);
-                });
-            }
-
-            btn.innerText = "进入系统";
-            btn.disabled = false;
-          })
-          .catch((err) => {
-            console.error("云端查询失败:", err);
-            // 云端查询失败，尝试从本地数据库获取
-            getRecordByQQ(qq)
-              .then((localData) => {
-                if (localData) {
-                  // 本地有数据，使用本地数据
-                  globalUserQQ = qq;
-                  document.getElementById("displayQQ").innerText = qq;
-                  document.getElementById("majorSelect").value =
-                    localData.major;
-                  document.getElementById("sub1").value = localData.s1;
-                  document.getElementById("sub2").value = localData.s2;
-                  document.getElementById("sub3").value = localData.s3;
-                  document.getElementById("sub4").value = localData.s4;
-
-                  document.getElementById("rankFilter").value = localData.major;
-                  showStep(3);
-                  fetchRanking();
-                } else {
-                  // 本地也没有数据，提示网络失败
-                  alert("网络连接失败，请检查网络！");
-                }
-              })
-              .catch((localErr) => {
-                console.error("本地查询也失败:", localErr);
-                alert("网络连接失败，请检查网络！");
-              })
-              .finally(() => {
-                btn.innerText = "进入系统";
-                btn.disabled = false;
-              });
-          });
+            showStep(2);
+          }
+        } catch (err) {
+          console.error("MySQL查询失败:", err);
+          alert("网络连接失败，请检查网络！");
+        } finally {
+          btn.innerText = "进入系统";
+          btn.disabled = false;
+        }
       }
 
       function goToModify() {
@@ -652,7 +514,7 @@
         showStep(2);
       }
 
-      function submitCloudScore() {
+      async function submitCloudScore() {
         let major = document.getElementById("majorSelect").value;
         let v1 = document.getElementById("sub1").value;
         let v2 = document.getElementById("sub2").value;
@@ -668,47 +530,33 @@
           return;
         }
 
-        let s1 = Number(v1);
-        let s2 = Number(v2);
-        let s3 = Number(v3);
-        let s4 = Number(v4);
-        let total = s1 + s2 + s3 + s4;
+        let politics = Number(v1);
+        let english = Number(v2);
+        let math = Number(v3);
+        let professional = Number(v4);
+        let total = politics + english + math + professional;
 
         let btn = document.getElementById("submitBtn");
         btn.innerText = "数据传输中...";
         btn.disabled = true;
 
-        // 同时保存到本地数据库
-        const record = {
+        // 保存到MySQL数据库
+        const scoreData = {
           qq: globalUserQQ,
           major: major,
-          s1: s1,
-          s2: s2,
-          s3: s3,
-          s4: s4,
+          politics: politics,
+          english: english,
+          math: math,
+          professional: professional,
           total: total,
+          is_deleted: 1, // 默认删除状态
         };
-        saveRecord(record).catch((err) => console.error("本地保存失败:", err));
 
-        // 保存到云端
-        const query = Bmob.Query("ScoreRecord");
-        // 如果有云端 ID，就执行更新；如果没有，就执行新建
-        if (globalRecordId) {
-          query.set("id", globalRecordId);
-        }
-        query.set("qq", globalUserQQ);
-        query.set("major", major);
-        query.set("s1", s1);
-        query.set("s2", s2);
-        query.set("s3", s3);
-        query.set("s4", s4);
-        query.set("total", total);
-
-        query
-          .save()
-          .then((res) => {
+        try {
+          const res = await submitScore(scoreData);
+          if (res.success) {
             if (!globalRecordId) {
-              globalRecordId = res.objectId;
+              globalRecordId = globalUserQQ;
               alert("初试成绩录入成功！");
             } else {
               alert("成绩已成功更新！");
@@ -717,49 +565,47 @@
             document.getElementById("rankFilter").value = major;
             showStep(3);
             fetchRanking();
-          })
-          .catch((err) => {
-            console.error("云端保存失败:", err);
-            // 云端保存失败，但本地已经保存成功
-            alert("网络连接失败，成绩已保存到本地");
-            document.getElementById("rankFilter").value = major;
-            showStep(3);
-            fetchRanking();
-          })
-          .finally(() => {
-            btn.innerText = globalRecordId ? "确认修改并重新提交" : "提交成绩";
-            btn.disabled = false;
-          });
+          } else {
+            throw new Error(res.message || "保存失败");
+          }
+        } catch (err) {
+          console.error("MySQL保存失败:", err);
+          alert("网络连接失败，请检查网络！");
+        } finally {
+          btn.innerText = globalRecordId ? "确认修改并重新提交" : "提交成绩";
+          btn.disabled = false;
+        }
       }
 
-      function fetchRanking() {
+      async function fetchRanking() {
         let selectedMajor = document.getElementById("rankFilter").value;
         let rankDiv = document.getElementById("rankingList");
         rankDiv.innerHTML = "正在拉取 " + selectedMajor + " 的排名...";
 
-        // 先从云端获取数据
-        const query = Bmob.Query("ScoreRecord");
-        query.equalTo("major", "==", selectedMajor);
-        query.order("-total");
-        query.limit(100);
-
-        query
-          .find()
-          .then((records) => {
+        try {
+          // 从MySQL数据库获取数据
+          const res = await getRanking(selectedMajor);
+          if (res.success && res.data) {
+            // 转换数据格式，适配前端显示并过滤isDeleted为0的数据
+            const records = res.data
+              .filter((item) => item.isDeleted === 0)
+              .map((item) => ({
+                qq: item.qqNumber,
+                major: item.examDirection,
+                s1: item.politicsScore,
+                s2: item.englishScore,
+                s3: item.mathScore,
+                s4: item.professionalScore,
+                total: item.totalScore,
+              }));
             displayRanking(records, rankDiv, selectedMajor);
-          })
-          .catch((err) => {
-            console.error("云端排名获取失败:", err);
-            // 云端获取失败，尝试从本地数据库获取
-            getRankingByMajor(selectedMajor)
-              .then((localRecords) => {
-                displayRanking(localRecords, rankDiv, selectedMajor);
-              })
-              .catch((localErr) => {
-                console.error("本地排名获取失败:", localErr);
-                rankDiv.innerHTML = "数据获取失败，请检查网络。";
-              });
-          });
+          } else {
+            throw new Error("获取排名失败");
+          }
+        } catch (err) {
+          console.error("MySQL排名获取失败:", err);
+          rankDiv.innerHTML = "数据获取失败，请检查网络。";
+        }
       }
 
       // 显示排名
@@ -819,7 +665,7 @@
       let chartInstance;
 
       // 更新图表
-      function updateChart() {
+      async function updateChart() {
         const selectedMajor = document.getElementById("chartMajorSelect").value;
         const selectedSubject =
           document.getElementById("chartSubjectSelect").value;
@@ -839,19 +685,23 @@
           chartInstance = echarts.init(chartContainer);
         }
 
-        // 从本地数据库获取数据
-        getRankingByMajor(selectedMajor)
-          .then((records) => {
-            // 如果本地没有数据，尝试从云端获取
-            if (records.length === 0) {
-              const query = Bmob.Query("ScoreRecord");
-              query.equalTo("major", "==", selectedMajor);
-              query.order("-total");
-              return query.find();
-            }
-            return records;
-          })
-          .then((records) => {
+        try {
+          // 从MySQL数据库获取数据
+          const res = await getChartData(selectedMajor);
+          if (res.success && res.data) {
+            // 转换数据格式并过滤isDeleted为0的数据
+            const records = res.data
+              .filter((item) => item.isDeleted === 0)
+              .map((item) => ({
+                qq: item.qqNumber,
+                major: item.examDirection,
+                s1: item.politicsScore,
+                s2: item.englishScore,
+                s3: item.mathScore,
+                s4: item.professionalScore,
+                total: item.totalScore,
+              }));
+
             // 处理数据
             const sortedRecords = records.sort(
               (a, b) => a[selectedSubject] - b[selectedSubject],
@@ -925,18 +775,20 @@
 
             // 设置图表选项
             chartInstance.setOption(option);
-          })
-          .catch((err) => {
-            console.error("获取图表数据失败:", err);
-            // 显示错误信息
-            chartInstance.setOption({
-              title: {
-                text: "获取数据失败",
-                left: "center",
-              },
-              series: [],
-            });
+          } else {
+            throw new Error("获取图表数据失败");
+          }
+        } catch (err) {
+          console.error("MySQL图表数据获取失败:", err);
+          // 显示错误信息
+          chartInstance.setOption({
+            title: {
+              text: "获取数据失败",
+              left: "center",
+            },
+            series: [],
           });
+        }
       }
 
       // 窗口大小变化时，重新调整图表大小
