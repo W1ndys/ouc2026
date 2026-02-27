@@ -1,4 +1,5 @@
 com\newbackend\entity\ScoreRecord.class
+com\newbackend\NewBackendApplication$WebConfig.class
 com\newbackend\service\ScoreService$1.class
 com\newbackend\controller\ScoreController$StatusUpdateRequest.class
 com\newbackend\controller\ScoreController$Response.class

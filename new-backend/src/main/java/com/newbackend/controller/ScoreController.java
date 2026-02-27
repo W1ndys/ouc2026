@@ -3,8 +3,12 @@ package com.newbackend.controller;
 import com.newbackend.entity.ScoreRecord;
 import com.newbackend.service.ScoreService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/score")
@@ -82,6 +86,40 @@ public class ScoreController {
     public Response batchUpdateStatus(@RequestBody BatchUpdateStatusRequest request) {
         int count = scoreService.batchUpdateStatus(request.getQqs(), request.getIsDeleted());
         return new Response(true, "成功更新" + count + "条记录的状态", null);
+    }
+
+    // 文件上传接口
+    @PostMapping("/upload")
+    public Response uploadFile(@RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            return new Response(false, "请选择要上传的文件", null);
+        }
+
+        // 使用应用的工作目录作为上传目录
+        String uploadDir = System.getProperty("user.dir") + File.separator + "upload";
+        File dir = new File(uploadDir);
+        if (!dir.exists()) {
+            boolean created = dir.mkdirs();
+            if (!created) {
+                return new Response(false, "无法创建上传目录", null);
+            }
+        }
+
+        // 生成唯一文件名
+        String originalFilename = file.getOriginalFilename();
+        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        String filename = UUID.randomUUID().toString() + extension;
+        String filePath = uploadDir + File.separator + filename;
+
+        try {
+            // 保存文件
+            file.transferTo(new File(filePath));
+            // 返回相对路径
+            return new Response(true, "文件上传成功", "/upload/" + filename);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new Response(false, "文件上传失败", null);
+        }
     }
 
     // 批量更新状态请求类

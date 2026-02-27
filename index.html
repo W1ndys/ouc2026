@@ -294,10 +294,12 @@
             type="file"
             id="scoreImage"
             accept="image/png, image/jpeg, image/jpg"
+            onchange="uploadImage()"
           />
           <div style="font-size: 11px; color: #888; margin-top: 5px">
             包含准考证号和分数的完整截图，审核唯一凭证。
           </div>
+          <div id="uploadStatus" style="font-size: 11px; margin-top: 5px; display: none"></div>
         </div>
         <button id="submitBtn" onclick="submitCloudScore()">
           提交数据，等待管理员审核
@@ -330,8 +332,6 @@
             style="padding: 6px; font-size: 13px"
           ></select>
         </div>
-
-        <div id="statsBanner"></div>
 
         <div id="statsBanner"></div>
 
@@ -466,47 +466,80 @@
         </div>
       </div>
 
-      <div id="step5" class="step-box">
-        <div style="text-align: center; padding: 20px 10px">
-          <div style="font-size: 60px; margin-bottom: 10px">⏳</div>
-          <h3 style="color: #e67e22; margin-bottom: 15px">
-            档案正在火速审核中...
-          </h3>
-          <div
-            style="
-              font-size: 13px;
-              color: #555;
-              line-height: 1.6;
-              background: #fdf2e9;
-              padding: 15px;
-              border-radius: 8px;
-              text-align: left;
-            "
-          >
-            为保证每位同学看到的分数绝对真实：<br /><br />
-            1. 管理员正在人工比对你的<b>查分截图</b>与<b>填报分数</b>。<br />
-            2. <b>审核通过后，你将立即解锁完整的大盘数据、排行与图表！</b><br />
-            3. 请耐心等待，稍后可重新输入 QQ 登录查看进度。
-          </div>
-          <button
-            onclick="goToModify()"
-            style="background-color: #3498db; margin-top: 25px"
-          >
-            我想修改提交的数据
-          </button>
-          <button
-            onclick="logout()"
-            style="background-color: #7f8c8d; margin-top: 10px"
-          >
-            退出，稍后再来看
-          </button>
-        </div>
+      <!-- 重复的step5已删除 -->
       </div>
     </div>
 
     <script>
-      // Bmob 密钥初始化
-      Bmob.initialize("3214f8afece0391a", "ouc2026score1234");
+      // 后端API地址
+      const API_BASE_URL = "http://47.105.33.142:8080/api/score";
+
+      // 通用API请求函数
+      async function apiRequest(endpoint, method = "GET", data = null) {
+        const url = `${API_BASE_URL}${endpoint}`;
+        const options = {
+          method,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "omit",
+        };
+
+        if (data) {
+          options.body = JSON.stringify(data);
+        }
+
+        try {
+          const response = await fetch(url, options);
+          if (!response.ok) {
+            throw new Error(`API请求失败: ${response.status}`);
+          }
+          return await response.json();
+        } catch (error) {
+          console.error("API请求错误:", error);
+          throw error;
+        }
+      }
+
+      // 图片上传函数
+      let uploadedPicturePath = "";
+      async function uploadImage() {
+        const scoreImageInput = document.getElementById("scoreImage");
+        const uploadStatus = document.getElementById("uploadStatus");
+
+        if (scoreImageInput.files.length > 0) {
+          const file = scoreImageInput.files[0];
+          const formData = new FormData();
+          formData.append("file", file);
+
+          uploadStatus.style.display = "block";
+          uploadStatus.style.color = "#3498db";
+          uploadStatus.textContent = "正在上传图片...";
+
+          try {
+            const uploadResponse = await fetch(`${API_BASE_URL}/upload`, {
+              method: "POST",
+              body: formData,
+            });
+
+            const uploadResult = await uploadResponse.json();
+            if (uploadResult.success) {
+              uploadedPicturePath = uploadResult.data;
+              uploadStatus.style.color = "#27ae60";
+              uploadStatus.textContent = "图片上传成功！";
+            } else {
+              uploadStatus.style.color = "#e74c3c";
+              uploadStatus.textContent = "图片上传失败，请重新选择";
+              uploadedPicturePath = "";
+            }
+          } catch (error) {
+            console.error("图片上传失败:", error);
+            uploadStatus.style.color = "#e74c3c";
+            uploadStatus.textContent = "网络错误，图片上传失败";
+            uploadedPicturePath = "";
+          }
+        }
+      }
 
       // 动态注入【大盘聚合】选项
       const baseOptions = document.getElementById("majorSelect").innerHTML;
@@ -624,7 +657,7 @@
         reader.readAsDataURL(file);
       }
 
-      function loginWithQQ() {
+      async function loginWithQQ() {
         let qq = document.getElementById("loginQQ").value.trim();
         if (!qq || qq.length < 5) {
           alert("请输入正确的QQ号！");
@@ -635,98 +668,65 @@
         btn.innerText = "正在核对档案...";
         btn.disabled = true;
 
-        const query = Bmob.Query("ScoreRecord");
-        query.equalTo("qq", "==", qq);
-        query
-          .find()
-          .then((res) => {
-            globalUserQQ = qq;
-            document.getElementById("displayQQ").innerText = qq;
+        try {
+          const res = await apiRequest("/login", "POST", { qq });
+          globalUserQQ = qq;
+          document.getElementById("displayQQ").innerText = qq;
 
-            if (res.length > 0) {
-              let myData = res[0];
-              globalRecordId = myData.objectId;
-              globalIsApproved = myData.isApproved === true;
+          if (res.success && res.data) {
+            let myData = res.data;
+            globalRecordId = myData.qq;
+            globalIsApproved = myData.isDeleted === 0;
 
-              document.getElementById("ticketNum").value =
-                myData.ticketNum || "";
-              document.getElementById("majorSelect").value = myData.major;
-              document.getElementById("sub1").value = myData.s1;
-              document.getElementById("sub2").value = myData.s2;
-              document.getElementById("sub3").value = myData.s3;
-              document.getElementById("sub4").value = myData.s4;
-              document.getElementById("imgRequireTip").innerText =
-                "(已上传过，如不更换可不选)";
+            // 处理准考证号，同时支持examNumber和exam_number字段
+            const examNumber = myData.examNumber || myData.exam_number || "";
+            document.getElementById("ticketNum").value = examNumber;
+            document.getElementById("majorSelect").value = myData.major;
+            document.getElementById("sub1").value = myData.politics;
+            document.getElementById("sub2").value = myData.english;
+            document.getElementById("sub3").value = myData.math;
+            document.getElementById("sub4").value = myData.professional;
+            document.getElementById("imgRequireTip").innerText =
+              "(已上传过，如不更换可不选)";
 
-              const record = {
-                qq: qq,
-                ticketNum: myData.ticketNum,
-                major: myData.major,
-                s1: myData.s1,
-                s2: myData.s2,
-                s3: myData.s3,
-                s4: myData.s4,
-                total: myData.total,
-                isApproved: globalIsApproved,
-              };
-              saveRecord(record).catch((err) =>
-                console.error("本地保存失败:", err),
-              );
-
-              if (globalIsApproved) {
-                showStep(3);
-                fetchRanking();
-              } else {
-                showStep(5);
+            // 处理图片路径
+            if (myData.picture) {
+              uploadedPicturePath = myData.picture;
+              // 创建预览图片
+              const scoreImageInput = document.getElementById("scoreImage");
+              const uploadStatus = document.getElementById("uploadStatus");
+              if (uploadStatus) {
+                uploadStatus.style.display = "block";
+                uploadStatus.style.color = "#27ae60";
+                uploadStatus.textContent = "图片已上传";
               }
-            } else {
-              getRecordByQQ(qq)
-                .then((localData) => {
-                  if (localData) {
-                    document.getElementById("ticketNum").value =
-                      localData.ticketNum || "";
-                    document.getElementById("majorSelect").value =
-                      localData.major;
-                    document.getElementById("sub1").value = localData.s1;
-                    document.getElementById("sub2").value = localData.s2;
-                    document.getElementById("sub3").value = localData.s3;
-                    document.getElementById("sub4").value = localData.s4;
-                    globalIsApproved = localData.isApproved === true;
-
-                    if (globalIsApproved) {
-                      showStep(3);
-                      fetchRanking();
-                    } else {
-                      showStep(5);
-                    }
-                  } else {
-                    globalRecordId = "";
-                    globalIsApproved = false;
-                    document.getElementById("ticketNum").value = "";
-                    document.getElementById("majorSelect").value = "";
-                    document.getElementById("sub1").value = "";
-                    document.getElementById("sub2").value = "";
-                    document.getElementById("sub3").value = "";
-                    document.getElementById("sub4").value = "";
-                    document.getElementById("scoreImage").value = "";
-                    document.getElementById("imgRequireTip").innerText =
-                      "(新录入必须上传截图凭证)";
-                    showStep(2);
-                  }
-                })
-                .catch(() => {
-                  showStep(2);
-                });
             }
-            btn.innerText = "进入系统";
-            btn.disabled = false;
-          })
-          .catch((err) => {
+
+            const record = {
+              qq: qq,
+              ticketNum: examNumber,
+              major: myData.major,
+              s1: myData.politics,
+              s2: myData.english,
+              s3: myData.math,
+              s4: myData.professional,
+              total: myData.total,
+              isApproved: globalIsApproved,
+            };
+            saveRecord(record).catch((err) =>
+              console.error("本地保存失败:", err),
+            );
+
+            if (globalIsApproved) {
+              showStep(3);
+              fetchRanking();
+            } else {
+              showStep(5);
+            }
+          } else {
             getRecordByQQ(qq)
               .then((localData) => {
                 if (localData) {
-                  globalUserQQ = qq;
-                  document.getElementById("displayQQ").innerText = qq;
                   document.getElementById("ticketNum").value =
                     localData.ticketNum || "";
                   document.getElementById("majorSelect").value =
@@ -744,15 +744,54 @@
                     showStep(5);
                   }
                 } else {
-                  alert("网络连接失败，请检查网络！");
+                  globalRecordId = "";
+                  globalIsApproved = false;
+                  document.getElementById("ticketNum").value = "";
+                  document.getElementById("majorSelect").value = "";
+                  document.getElementById("sub1").value = "";
+                  document.getElementById("sub2").value = "";
+                  document.getElementById("sub3").value = "";
+                  document.getElementById("sub4").value = "";
+                  document.getElementById("scoreImage").value = "";
+                  document.getElementById("imgRequireTip").innerText =
+                    "(新录入必须上传截图凭证)";
+                  showStep(2);
                 }
               })
-              .catch(() => alert("网络连接失败，请检查网络！"))
-              .finally(() => {
-                btn.innerText = "进入系统";
-                btn.disabled = false;
+              .catch(() => {
+                showStep(2);
               });
-          });
+          }
+        } catch (err) {
+          getRecordByQQ(qq)
+            .then((localData) => {
+              if (localData) {
+                globalUserQQ = qq;
+                document.getElementById("displayQQ").innerText = qq;
+                document.getElementById("ticketNum").value =
+                  localData.ticketNum || "";
+                document.getElementById("majorSelect").value = localData.major;
+                document.getElementById("sub1").value = localData.s1;
+                document.getElementById("sub2").value = localData.s2;
+                document.getElementById("sub3").value = localData.s3;
+                document.getElementById("sub4").value = localData.s4;
+                globalIsApproved = localData.isApproved === true;
+
+                if (globalIsApproved) {
+                  showStep(3);
+                  fetchRanking();
+                } else {
+                  showStep(5);
+                }
+              } else {
+                alert("网络连接失败，请检查网络！");
+              }
+            })
+            .catch(() => alert("网络连接失败，请检查网络！"));
+        } finally {
+          btn.innerText = "进入系统";
+          btn.disabled = false;
+        }
       }
 
       function goToModify() {
@@ -762,7 +801,7 @@
         showStep(2);
       }
 
-      function submitCloudScore() {
+      async function submitCloudScore() {
         let ticketNum = document.getElementById("ticketNum").value;
         let major = document.getElementById("majorSelect").value;
         let v1 = document.getElementById("sub1").value;
@@ -798,63 +837,54 @@
         btn.innerText = "数据传输中...";
         btn.disabled = true;
 
-        function uploadToCloud(base64ImageStr) {
-          saveRecord({
+        try {
+          // 使用已经上传好的图片路径
+          const scoreData = {
             qq: globalUserQQ,
-            ticketNum: ticketNum,
             major: major,
-            s1: s1,
-            s2: s2,
-            s3: s3,
-            s4: s4,
+            politics: s1,
+            english: s2,
+            math: s3,
+            professional: s4,
             total: total,
-            isApproved: false,
-          }).catch((err) => console.error("本地保存失败:", err));
+            isDeleted: 1, // 默认未启用，需要审核
+            exam_number: ticketNum,
+            picture: uploadedPicturePath
+          };
 
-          const query = Bmob.Query("ScoreRecord");
-          if (globalRecordId) {
-            query.set("id", globalRecordId);
+          const res = await apiRequest("/submit", "POST", scoreData);
+          
+          if (res.success) {
+            saveRecord({
+              qq: globalUserQQ,
+              ticketNum: ticketNum,
+              major: major,
+              s1: s1,
+              s2: s2,
+              s3: s3,
+              s4: s4,
+              total: total,
+              isApproved: false,
+            }).catch((err) => console.error("本地保存失败:", err));
+
+            if (!globalRecordId) {
+              globalRecordId = globalUserQQ;
+              alert("初试成绩与凭证上传成功！");
+            } else {
+              alert("成绩已成功更新，需重新审核！");
+            }
+            showStep(5);
+          } else {
+            throw new Error("提交失败");
           }
-          query.set("qq", globalUserQQ);
-          query.set("ticketNum", ticketNum);
-          query.set("major", major);
-          query.set("s1", s1);
-          query.set("s2", s2);
-          query.set("s3", s3);
-          query.set("s4", s4);
-          query.set("total", total);
-          query.set("isApproved", false);
-          if (base64ImageStr) {
-            query.set("scorePicText", base64ImageStr);
-          }
-
-          query
-            .save()
-            .then((res) => {
-              if (!globalRecordId) {
-                globalRecordId = res.objectId;
-                alert("初试成绩与凭证上传成功！");
-              } else {
-                alert("成绩已成功更新，需重新审核！");
-              }
-              showStep(5);
-            })
-            .catch((err) => {
-              console.error("云端保存失败:", err);
-              alert(
-                "网络连接失败，数据已暂存本地，待网络恢复后请重新点击提交！",
-              );
-              btn.innerText = globalRecordId
-                ? "确认修改数据 (将重新进入审核)"
-                : "提交数据，等待管理员审核";
-              btn.disabled = false;
-            });
-        }
-
-        if (scoreImageInput.files.length > 0) {
-          compressImageToBase64(scoreImageInput.files[0], uploadToCloud);
-        } else {
-          uploadToCloud(null);
+        } catch (err) {
+          console.error("提交失败:", err);
+          alert("网络连接失败，数据已暂存本地，待网络恢复后请重新点击提交！");
+        } finally {
+          btn.innerText = globalRecordId
+            ? "确认修改数据 (将重新进入审核)"
+            : "提交数据，等待管理员审核";
+          btn.disabled = false;
         }
       }
 
@@ -862,10 +892,25 @@
       async function getAggregatedData(selectedMajor) {
         let records = [];
         try {
-          const query = Bmob.Query("ScoreRecord");
-          query.equalTo("isApproved", "==", true);
-          query.limit(1000);
-          records = await query.find();
+          // 由于后端API不支持聚合查询，我们需要获取所有数据后在前端进行过滤
+          // 这里使用专业课方向作为查询参数，后续在前端进行聚合
+          const major = selectedMajor.includes("ALL_")
+            ? "081200 计算机科学与技术 (00不区分)"
+            : selectedMajor;
+          const res = await apiRequest(
+            `/ranking?major=${encodeURIComponent(major)}`,
+          );
+          if (res.success && res.data) {
+            records = res.data.map((item) => ({
+              qq: item.qq,
+              major: item.major,
+              s1: item.politics,
+              s2: item.english,
+              s3: item.math,
+              s4: item.professional,
+              total: item.total,
+            }));
+          }
         } catch (e) {
           console.warn("云端拉取失败，尝试使用本地缓存");
           records = await getAllApprovedLocalRecords();
@@ -949,11 +994,6 @@
             ? `<div style="font-size:11px; color:#0056b3; margin-top:3px; word-break: break-all;">${item.major}</div>`
             : "";
 
-          // 大盘模式下，额外显示他们的具体专业方向
-          let majorInfo = selectedMajor.startsWith("ALL_")
-            ? `<div style="font-size:11px; color:#0056b3; margin-top:3px; word-break: break-all;">${item.major}</div>`
-            : "";
-
           htmlStr += `
                 <div class="rank-item" style="${bgStyle}">
                     <div class="rank-num">#${index + 1}</div>
@@ -1006,9 +1046,9 @@
           let records = await getAggregatedData(selectedMajor);
           records.sort((a, b) => b[selectedSubject] - a[selectedSubject]);
 
-          const ranks = records.map((_, index) => index + 1);
-          const scores = records.map((r) => r[selectedSubject]);
-          const names = records.map((r) => `#${r.qq.toString().slice(-4)}`);
+          const ranks = records.map((_, index) => index + 1).reverse();
+          const scores = records.map((r) => r[selectedSubject]).reverse();
+          const names = records.map((r) => `#${r.qq.toString().slice(-4)}`).reverse();
 
           const selectEl = document.getElementById("chartMajorSelect");
           const titlePrefix = selectEl.options[selectEl.selectedIndex].text
@@ -1018,7 +1058,7 @@
           const option = {
             title: {
               text:
-                titlePrefix + "\\n" + subjectNames[selectedSubject] + "分布",
+                titlePrefix + subjectNames[selectedSubject] + "分布",
               left: "center",
               textStyle: { fontSize: 14 },
             },
@@ -1026,7 +1066,7 @@
               trigger: "axis",
               formatter: function (params) {
                 const index = params[0].dataIndex;
-                return `排名: ${ranks[index]}<br/>${subjectNames[selectedSubject]}: ${scores[index]}<br/>尾号: ${names[index]}<br/><span style="font-size:10px;">${records[index].major}</span>`;
+                return `排名: ${ranks[index]}<br/>${subjectNames[selectedSubject]}: ${scores[index]}<br/>尾号: ${names[index]}<br/><span style="font-size:10px;">${records[records.length - 1 - index].major}</span>`;
               },
             },
             xAxis: {

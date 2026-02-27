@@ -15,6 +15,8 @@ public class ScoreRecord {
     private Date createTime;
     private Date updateTime;
     private int isDeleted;
+    private String examNumber;
+    private String picture;
 
     // Getters and Setters
     public String getQqNumber() {
@@ -174,5 +176,30 @@ public class ScoreRecord {
 
     public void setIs_deleted(int is_deleted) {
         this.isDeleted = is_deleted;
+    }
+
+    public String getExamNumber() {
+        return examNumber;
+    }
+
+    public void setExamNumber(String examNumber) {
+        this.examNumber = examNumber;
+    }
+
+    // 前端传递的字段名
+    public String getExam_number() {
+        return examNumber;
+    }
+
+    public void setExam_number(String exam_number) {
+        this.examNumber = exam_number;
+    }
+
+    public String getPicture() {
+        return picture;
+    }
+
+    public void setPicture(String picture) {
+        this.picture = picture;
     }
 }

@@ -308,17 +308,9 @@
                 ><input
                   type="checkbox"
                   checked
-                  onchange="toggleColumn('createTime')"
+                  onchange="toggleColumn('picture')"
                 />
-                创建时间</label
-              >
-              <label
-                ><input
-                  type="checkbox"
-                  checked
-                  onchange="toggleColumn('updateTime')"
-                />
-                更新时间</label
+                图片</label
               >
               <label
                 ><input
@@ -372,8 +364,7 @@
               <th data-column="math">数学</th>
               <th data-column="professional">专业课</th>
               <th data-column="total">总分</th>
-              <th data-column="createTime">创建时间</th>
-              <th data-column="updateTime">更新时间</th>
+              <th data-column="picture" style="width: 100px">图片</th>
               <th data-column="status">状态</th>
               <th data-column="action">操作</th>
             </tr>
@@ -384,6 +375,29 @@
         </table>
       </div>
 
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: 10px;
+        "
+      >
+        <div id="totalRecords" style="font-size: 14px; color: #666"></div>
+        <div style="display: flex; align-items: center; gap: 10px">
+          <span style="font-size: 14px; color: #666">每页显示:</span>
+          <select
+            id="pageSizeSelect"
+            onchange="changePageSize()"
+            style="padding: 4px 8px; font-size: 14px"
+          >
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+      </div>
       <div class="pagination" id="pagination">
         <!-- 分页按钮将通过JavaScript动态添加 -->
       </div>
@@ -445,19 +459,20 @@
               math: item.mathScore,
               professional: item.professionalScore,
               total: item.totalScore,
-              createTime: item.createTime,
-              updateTime: item.updateTime,
+              picture: item.picture,
               isDeleted: item.isDeleted,
             }));
+
+            // 保存原始记录
+            allRecords = records;
 
             // 根据QQ号筛选
             if (qqSearch) {
               records = records.filter((item) => item.qq.includes(qqSearch));
             }
 
-            allRecords = records;
             renderTable(records);
-            // 渲染分页控件
+            // 渲染分页控件，使用后端返回的总记录数
             renderPagination(paginationData.total);
             showMessage("数据加载成功", "success");
           } else {
@@ -497,7 +512,7 @@
       // 全局变量
       let allRecords = []; // 所有数据
       let currentPage = 1;
-      const pageSize = 10;
+      let pageSize = 10;
 
       // 显示消息
       function showMessage(text, type) {
@@ -510,6 +525,14 @@
         setTimeout(() => {
           messageDiv.style.display = "none";
         }, 3000);
+      }
+
+      // 更改分页大小
+      function changePageSize() {
+        const select = document.getElementById("pageSizeSelect");
+        pageSize = parseInt(select.value);
+        currentPage = 1; // 重置为第一页
+        fetchAllData();
       }
 
       // 列显示/隐藏控制
@@ -605,25 +628,17 @@
 
         if (records.length === 0) {
           const row = document.createElement("tr");
-          row.innerHTML = `<td colspan="12" style="text-align: center;">暂无数据</td>`;
+          row.innerHTML = `<td colspan="11" style="text-align: center;">暂无数据</td>`;
           tbody.appendChild(row);
           document.getElementById("batchActions").style.display = "none";
-          renderPagination(0);
           return;
         }
 
         // 显示批量操作按钮
         document.getElementById("batchActions").style.display = "flex";
 
-        // 渲染分页
-        renderPagination(records.length);
-
-        // 计算当前页显示的数据
-        const start = (currentPage - 1) * pageSize;
-        const end = start + pageSize;
-        const currentRecords = records.slice(start, end);
-
-        currentRecords.forEach((record) => {
+        // 直接使用后端返回的当前页数据
+        records.forEach((record) => {
           const row = document.createElement("tr");
 
           // 格式化时间
@@ -638,6 +653,14 @@
           const buttonClass =
             record.isDeleted === 0 ? "btn-disable" : "btn-enable";
 
+          // 图片显示逻辑
+          let pictureHtml = "";
+          if (record.picture) {
+            pictureHtml = `<img src="http://47.105.33.142:8080${record.picture}" style="width: 80px; height: auto; max-height: 60px; object-fit: contain;" alt="查分截图">`;
+          } else {
+            pictureHtml = "无图片";
+          }
+
           row.innerHTML = `
               <td><input type="checkbox" class="row-checkbox" value="${record.qq}"></td>
               <td data-column="qq">${record.qq}</td>
@@ -647,8 +670,7 @@
               <td data-column="math">${record.math}</td>
               <td data-column="professional">${record.professional}</td>
               <td data-column="total">${record.total}</td>
-              <td data-column="createTime">${createTime}</td>
-              <td data-column="updateTime">${updateTime}</td>
+              <td data-column="picture">${pictureHtml}</td>
               <td data-column="status">${statusText}</td>
               <td data-column="action"><button class="${buttonClass}" onclick="toggleStatus('${record.qq}', ${record.isDeleted})">${buttonText}</button></td>
           `;
@@ -659,6 +681,14 @@
 
       // 渲染分页
       function renderPagination(totalRecords) {
+        // 显示总记录数
+        const totalRecordsElement = document.getElementById("totalRecords");
+        totalRecordsElement.textContent = `共 ${totalRecords} 条记录`;
+
+        // 设置当前选中的分页大小
+        const pageSizeSelect = document.getElementById("pageSizeSelect");
+        pageSizeSelect.value = pageSize;
+
         const pagination = document.getElementById("pagination");
         pagination.innerHTML = "";
 
@@ -706,10 +736,23 @@
         // 添加专业方向选项
         const majorSelect = document.getElementById("majorFilter");
         const majors = [
-          "081200 计算机科学与技术 (00不区分)",
-          "083500 软件工程 (00不区分)",
-          "085400 电子信息 (01计算机技术)",
-          "085400 电子信息 (02软件工程)",
+          "[信息] 081200 计算机科学与技术 (00不区分)",
+          "[信息] 0812Z1 网络空间安全与保密 (00不区分)",
+          "[信息] 085404 计算机技术 (01计算机技术)",
+          "[信息] 085404 计算机技术 (02三亚)",
+          "[信息] 085404 计算机技术 (03万里学院联培)",
+          "[信息] 085404 计算机技术 (04中法双硕士)",
+          "[信息] 085404 计算机技术 (05中新双硕士)",
+          "[信息] 085404 计算机技术 (00不区分)",
+          "[信息] 085405 软件工程 (00不区分)",
+          "[信息] 085410 人工智能 (01人工智能)",
+          "[信息] 085410 人工智能 (02三亚)",
+          "[信息] 085410 人工智能 (00不区分)",
+          "[卓越] 085404 计算机技术 (00不区分)",
+          "[卓越] 085405 软件工程 (00不区分)",
+          "[卓越] 085410 人工智能 (00不区分)",
+          "[卓越] 085411 大数据技术与工程 (00不区分)",
+          "[卓越] 085412 网络与信息安全 (00不区分)",
         ];
 
         majors.forEach((major) => {
